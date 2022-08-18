@@ -29,15 +29,25 @@ public class RTMPushProcessor
 
 
     /**
-     * 源语言语音的识别文本结果
+     *源语言识别结果
+     * @param streamId 翻译流id
+     * @param startTs  结果开始的毫秒时间戳
+     * @param endTs    结果结束的毫秒时间戳
+     * @param recTs    识别时间戳，毫秒
+     * @param srcVoiceText 源语言语音的识别文本结果
      */
-    public void recognizedResult(int streamId, String srcVoiceText){}
+    public void recognizedResult(int streamId, int startTs, int endTs, int recTs, String srcVoiceText){}
 
 
     /**
-     * 目标语言的翻译文本结果
+     *目标言识别结果
+     * @param streamId 翻译流id
+     * @param startTs  结果开始的毫秒时间戳
+     * @param endTs    结果结束的毫秒时间戳
+     * @param recTs    识别时间戳，毫秒
+     * @param destVoiceText 目标语言语音的识别文本结果
      */
-    public void translatedResult(int streamId, String destVoiceText){}
+    public void translatedResult(int streamId, int startTs, int endTs, int recTs, String destVoiceText){}
 
 }
 

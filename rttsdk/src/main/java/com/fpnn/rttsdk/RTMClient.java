@@ -101,9 +101,10 @@ public class RTMClient extends RTMCore {
      * @param streamId 翻译流id
      * @param seq   语音片段序号(尽量有序)
      * @param voicedata 语音数据
+     * @param voiceDataTs 音频帧对应时间戳
      * @param callback
      */
-    public void sendVoice(int streamId, long seq, byte[] voicedata, UserInterface.IRTMEmptyCallback callback) {
+    public void sendVoice(int streamId, long seq, byte[] voicedata, long voiceDataTs, UserInterface.IRTMEmptyCallback callback) {
         if (voicedata.length != 640){
             callback.onResult(genRTMAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_METHOD.value(), "please send 640 bytes length data"));
             return;
@@ -113,7 +114,7 @@ public class RTMClient extends RTMCore {
         quest.param("streamId", streamId);
         quest.param("seq", seq);
         quest.param("data", voicedata);
-        quest.param("ts", Genid.getCurrentMilliseconds());
+        quest.param("ts", voiceDataTs);
         sendQuestEmptyCallback(callback, quest);
     }
 
@@ -132,8 +133,6 @@ public class RTMClient extends RTMCore {
             }
         },quest);
     }
-
-
 
 
 

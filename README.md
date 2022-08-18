@@ -16,6 +16,7 @@
 - 默认支持自动重连(请继承RTMPushProcessor类的reloginWillStart和reloginCompleted方法)
 - 服务器push消息:请继承RTMPushProcessor类,重写自己需要的push系列函数
 
+
 ### 使用示例
 import com.rtmsdk.RTMClient;<br>
 import com.rtmsdk.RTMErrorCode;
@@ -56,11 +57,13 @@ import com.rtmsdk.RTMErrorCode;
      */
     public RTMStruct.VoiceStream startStream(String srcLanguage, String destLanguage, boolean asrResult)
 
-     /**
+
+    /**
      * 发送语音片段
      * @param streamId 翻译流id
      * @param seq   语音片段序号(尽量有序)
      * @param voicedata 语音数据
+     * @param voiceDataTs 音频帧对应时间戳
      * @param callback
      */
     public void sendVoice(int streamId, long seq, byte[] voicedata, UserInterface.IRTMEmptyCallback callback) 

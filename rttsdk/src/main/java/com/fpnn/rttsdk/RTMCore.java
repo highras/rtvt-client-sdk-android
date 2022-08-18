@@ -134,8 +134,11 @@ class RTMCore extends BroadcastReceiver{
             rttGate.sendAnswer(new Answer(quest));
             String text = rtmUtils.wantString(quest, "asr");
             int streamId = rtmUtils.wantInt(quest, "streamId");
+            int startTs = rtmUtils.wantInt(quest, "startTs");
+            int endTs = rtmUtils.wantInt(quest, "endTs");
+            int recTs = rtmUtils.wantInt(quest, "recTs");
 
-            serverPushProcessor.recognizedResult(streamId, text);
+            serverPushProcessor.recognizedResult(streamId, startTs,endTs , recTs,text);
             return null;
         }
 
@@ -144,8 +147,11 @@ class RTMCore extends BroadcastReceiver{
             rttGate.sendAnswer(new Answer(quest));
             String text = rtmUtils.wantString(quest, "trans");
             int streamId = rtmUtils.wantInt(quest, "streamId");
+            int startTs = rtmUtils.wantInt(quest, "startTs");
+            int endTs = rtmUtils.wantInt(quest, "endTs");
+            int recTs = rtmUtils.wantInt(quest, "recTs");
 
-            serverPushProcessor.translatedResult(streamId, text);
+            serverPushProcessor.translatedResult(streamId, startTs,endTs , recTs, text);
             return null;
         }
 

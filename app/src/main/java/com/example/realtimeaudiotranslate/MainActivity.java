@@ -97,8 +97,9 @@ public class MainActivity extends Activity {
             mylog.log("重连结果 " + answer.getErrInfo());
         }
 
+
         @Override
-        public void recognizedResult(int streamId, String srcVoiceText) {
+        public void recognizedResult(int streamId, int startTs, int endTs, int recTs, String srcVoiceText) {
             mylog.log("stream id:" + streamId + "srctext:" + srcVoiceText);
             runOnUiThread(new Runnable() {
                 @Override
@@ -110,7 +111,7 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void translatedResult(int streamId, String destVoiceText) {
+        public void translatedResult(int streamId, int startTs, int endTs, int recTs, String destVoiceText) {
             mylog.log("stream id:" + streamId + "desttext:" + destVoiceText);
             runOnUiThread(new Runnable() {
                 @Override
@@ -334,7 +335,7 @@ public class MainActivity extends Activity {
                                         System.arraycopy(voicedatatmp, 0 ,writedata,0,readLen);
                                     }*/
 
-                                    client.sendVoice(streamId, ++seq, voicedatatmp, new UserInterface.IRTMEmptyCallback(){
+                                    client.sendVoice(streamId, ++seq, voicedatatmp, System.currentTimeMillis(), new UserInterface.IRTMEmptyCallback(){
                                         @Override
                                         public void onResult(RTMStruct.RTMAnswer answer) {
                                             if(answer.errorCode != 0){
