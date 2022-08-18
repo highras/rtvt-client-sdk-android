@@ -1,50 +1,30 @@
 package com.example.realtimeaudiotranslate;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fpnn.rttsdk.RTMCenter;
-import com.fpnn.rttsdk.RTMClient;
-import com.fpnn.rttsdk.RTMPushProcessor;
-import com.fpnn.rttsdk.RTMStruct;
-import com.fpnn.rttsdk.UserInterface;
+import com.fpnn.rtvtsdk.RTVTCenter;
+import com.fpnn.rtvtsdk.RTVTClient;
+import com.fpnn.rtvtsdk.RTVTPushProcessor;
+import com.fpnn.rtvtsdk.RTVTStruct;
+import com.fpnn.rtvtsdk.RTVTUserInterface;
 
 import org.angmarch.views.NiceSpinner;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Time;
 import java.util.ArrayList;
-import java.util.Formatter;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 
 public class MainActivity extends Activity {
@@ -86,14 +66,14 @@ public class MainActivity extends Activity {
     }
 
 
-    class demoPush extends RTMPushProcessor{
+    class demoPush extends RTVTPushProcessor {
         @Override
         public boolean reloginWillStart(String uid, int reloginCount) {
             return  true;
         }
 
         @Override
-        public void reloginCompleted(String uid, boolean successful, RTMStruct.RTMAnswer answer, int reloginCount) {
+        public void reloginCompleted(String uid, boolean successful, RTVTStruct.RTVTAnswer answer, int reloginCount) {
             mylog.log("重连结果 " + answer.getErrInfo());
         }
 
@@ -124,8 +104,8 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void rtmConnectClose(String uid) {
-            mylog.log("rtc closed");
+        public void rtvtConnectClose(String uid) {
+            mylog.log("rtvt closed");
         }
     }
 
@@ -149,7 +129,7 @@ public class MainActivity extends Activity {
     int streamId = 0;
     long seq = 0;
     AudioTrackManager audioTrackManager;
-    RTMClient client;
+    RTVTClient client;
     Timer timer = null;
     byte [] zhData = null;
     byte [] enData = null;
@@ -242,7 +222,7 @@ public class MainActivity extends Activity {
             e.printStackTrace();
             return;
         }
-        client = RTMCenter.initRTMClient(endpoint, pid, uid, new demoPush(), this);
+        client = RTVTCenter.initRTMClient(endpoint, pid, uid, new demoPush(), this);
 
         quit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -262,9 +242,9 @@ public class MainActivity extends Activity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        client.login(realToken, System.currentTimeMillis()/1000, new UserInterface.IRTMEmptyCallback() {
+                        client.login(realToken, System.currentTimeMillis()/1000, new RTVTUserInterface.IRTVTEmptyCallback() {
                             @Override
-                            public void onResult(RTMStruct.RTMAnswer answer) {
+                            public void onResult(RTVTStruct.RTVTAnswer answer) {
                                 mylog.log(" login " + answer.getErrInfo());
                                 showToast(MainActivity.this, "login " + answer.getErrInfo());
                             }
@@ -310,9 +290,9 @@ public class MainActivity extends Activity {
 
                 String finalPlayName = playName;
                 final int[] offset = {0};
-                client.startTranslate(srclang, destlang, true, new UserInterface.IRTMCallback<RTMStruct.VoiceStream>() {
+                client.startTranslate(srclang, destlang, true, new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
                     @Override
-                    public void onResult(RTMStruct.VoiceStream voiceStream, RTMStruct.RTMAnswer answer) {
+                    public void onResult(RTVTStruct.VoiceStream voiceStream, RTVTStruct.RTVTAnswer answer) {
                         if (answer.errorCode == 0){
                             streamId = voiceStream.streamId;
                             byte[] voicedatatmp = new byte[readLen];
@@ -335,9 +315,9 @@ public class MainActivity extends Activity {
                                         System.arraycopy(voicedatatmp, 0 ,writedata,0,readLen);
                                     }*/
 
-                                    client.sendVoice(streamId, ++seq, voicedatatmp, System.currentTimeMillis(), new UserInterface.IRTMEmptyCallback(){
+                                    client.sendVoice(streamId, ++seq, voicedatatmp, System.currentTimeMillis(), new RTVTUserInterface.IRTVTEmptyCallback(){
                                         @Override
-                                        public void onResult(RTMStruct.RTMAnswer answer) {
+                                        public void onResult(RTVTStruct.RTVTAnswer answer) {
                                             if(answer.errorCode != 0){
                                                 mylog.log("sendVoice error " + answer.getErrInfo());
                                             }

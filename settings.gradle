@@ -1,3 +1,3 @@
 rootProject.name = "RealTimeAudioTranslate"
 include ':app'
-include ':rttsdk'
+include ':rtvtsdk'

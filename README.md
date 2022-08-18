@@ -1,4 +1,4 @@
-### android-rtm-sdk 使用文档
+### android-rtvt-sdk 使用文档
 - [版本支持](#版本支持)
 - [使用说明](#使用说明)
 - [使用示例](#使用示例)
@@ -13,29 +13,26 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET"/>
     ~~~
-- 默认支持自动重连(请继承RTMPushProcessor类的reloginWillStart和reloginCompleted方法)
-- 服务器push消息:请继承RTMPushProcessor类,重写自己需要的push系列函数
+- 默认支持自动重连(请继承RTVTPushProcessor类的reloginWillStart和reloginCompleted方法)
+- 服务器push消息:请继承RTVTPushProcessor类,重写自己需要的push系列函数
 
 
 ### 使用示例
-import com.rtmsdk.RTMClient;<br>
-import com.rtmsdk.RTMErrorCode;
-
  ~~~
-    public class RTMExampleQuestProcessor extends RTMPushProcessor {
+    public class RTVTExampleQuestProcessor extends RTVTPushProcessor {
         ....//重写自己需要处理的业务接口
     }
     
-    client = RTMCenter.initRTMClient(endpoint, pid, uid, new demoPush(), this);
+    client = RTVTCenter.initRTVTClient(endpoint, pid, uid, new demoPush(), this);
 
 
-    RTMClient client = new RTMClient(String endpoint, long pid, long uid,new RTMExampleQuestProcessor());
+    RTVTClient client = new RTVTClient(String endpoint, long pid, long uid,new RTVTExampleQuestProcessor());
     
-    client.login(String Token, long tokents, IRTMEmptyCallback  callback)
+    client.login(String Token, long tokents, IRTVTEmptyCallback  callback)
 
-    client.startTranslate("zh","en", true, IRTMCallback<VoiceStream> callback)
+    client.startTranslate("zh","en", true, IRTVTCallback<VoiceStream> callback)
     
-    client.sendVoice(int streamId, long seq, byte[] voicedata, UserInterface.IRTMEmptyCallback callback) 
+    client.sendVoice(int streamId, long seq, byte[] voicedata, UserInterface.IRTVTEmptyCallback callback) 
 ~~~
 
 ##  接口说明
@@ -44,7 +41,7 @@ import com.rtmsdk.RTMErrorCode;
      *rtm登陆  sync
      * @param token     用户token
      */
-    public RTMAnswer login(String token, long ts)
+    public RTVTAnswer login(String token, long ts)
 
     /**
      *开始实时翻译语音流(需要先login成功)
@@ -55,7 +52,7 @@ import com.rtmsdk.RTMErrorCode;
      *                  翻译结果通过
      * return VoiceStream
      */
-    public RTMStruct.VoiceStream startStream(String srcLanguage, String destLanguage, boolean asrResult)
+    public RTVTStruct.VoiceStream startStream(String srcLanguage, String destLanguage, boolean asrResult)
 
 
     /**
@@ -66,7 +63,7 @@ import com.rtmsdk.RTMErrorCode;
      * @param voiceDataTs 音频帧对应时间戳
      * @param callback
      */
-    public void sendVoice(int streamId, long seq, byte[] voicedata, UserInterface.IRTMEmptyCallback callback) 
+    public void sendVoice(int streamId, long seq, byte[] voicedata, UserInterface.IRTVTEmptyCallback callback) 
 
 
     /**
@@ -76,10 +73,10 @@ import com.rtmsdk.RTMErrorCode;
     public void stopTranslate(int streamId)
 
 
-    /** 释放rtmclient(释放资源,网络广播监听会持有RTMClient对象 如果不调用RTMClient对象会一直持有不释放)
-     * 如再次使用 需要重新调用RTMCenter.initRTMClient
+    /** 释放rtmclient(释放资源,网络广播监听会持有RTVTClient对象 如果不调用RTVTClient对象会一直持有不释放)
+     * 如再次使用 需要重新调用RTVTCenter.initRTVTClient
      */
-    public void closeRTM()
+    public void closeRTVT()
 ~~~
 
 ### DEMO
