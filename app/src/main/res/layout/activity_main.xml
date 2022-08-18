@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="@color/white"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+
+    <Button
+        android:id="@+id/quit"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/colors1"
+        android:text="退出"
+        app:layout_constraintBottom_toBottomOf="@+id/login"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/login">
+
+    </Button>
+
+    <Button
+        android:id="@+id/login"
+        android:layout_width="100dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/colors"
+        android:text="登录服务"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView">
+
+    </Button>
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="200dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="10dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/logo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/srcconstraintLayout"
+        android:layout_width="160dp"
+        android:layout_height="59dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/layoutback"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/login">
+
+        <TextView
+            android:id="@+id/srclangView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="源语言"
+            android:textColor="@color/colorAccent"
+            android:textSize="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"></TextView>
+
+        <org.angmarch.views.NiceSpinner
+            app:backgroundSelector="@drawable/background_selector"
+            android:id="@+id/srcspinner"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:overlapAnchor="false"
+            app:arrowTint="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/srclangView"
+            app:textTint="@color/white"
+            tools:layout_editor_absoluteY="2dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout1"
+        android:layout_width="160dp"
+        android:layout_height="59dp"
+        android:layout_marginStart="20dp"
+        android:background="@drawable/layoutback"
+        app:layout_constraintBottom_toBottomOf="@+id/srcconstraintLayout"
+        app:layout_constraintStart_toEndOf="@+id/srcconstraintLayout"
+        app:layout_constraintTop_toTopOf="@+id/srcconstraintLayout">
+
+        <TextView
+            android:id="@+id/destlangView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="目标语言"
+            android:textColor="@color/colorAccent"
+            android:textSize="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"></TextView>
+
+        <org.angmarch.views.NiceSpinner
+            android:id="@+id/destspinner"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:overlapAnchor="false"
+            app:arrowTint="@color/white"
+            app:backgroundSelector="@drawable/background_selector"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/destlangView"
+            app:textTint="@color/white"
+            tools:layout_editor_absoluteY="2dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Button
+        android:background="@drawable/colors"
+        android:id="@+id/starttest"
+        android:layout_width="129dp"
+        android:layout_height="53dp"
+        android:layout_marginTop="36dp"
+        android:text="开始测试"
+        app:layout_constraintStart_toStartOf="@+id/srcconstraintLayout"
+        app:layout_constraintTop_toBottomOf="@+id/srcconstraintLayout"></Button>
+
+    <Button
+        app:layout_constraintStart_toStartOf="@id/constraintLayout2"
+        android:id="@+id/endtest"
+        android:layout_width="109dp"
+        android:layout_height="42dp"
+        android:background="@drawable/colors1"
+        android:layout_marginTop="64dp"
+        android:text="结束测试"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2"
+        tools:layout_editor_absoluteX="12dp" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_marginEnd="15dp"
+        android:layout_width="0dp"
+        android:layout_height="130dp"
+        android:layout_marginTop="25dp"
+        android:background="@drawable/bg"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/starttest"
+        app:layout_constraintTop_toBottomOf="@+id/starttest">
+
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="源文本"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="5dp"></TextView>
+
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:background="#FFBA66"
+            app:layout_constraintStart_toEndOf="@id/textView" />
+
+        <ListView
+            android:transcriptMode="alwaysScroll"
+            android:id="@+id/srctext"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textView"
+            tools:layout_editor_absoluteY="-10dp"></ListView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout2"
+        android:layout_width="0dp"
+        android:layout_height="130dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg"
+        app:layout_constraintEnd_toEndOf="@id/constraintLayout"
+        app:layout_constraintStart_toStartOf="@id/constraintLayout"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="翻译文本"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="5dp"></TextView>
+
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:background="#FFBA66"
+            app:layout_constraintStart_toEndOf="@id/textView1" />
+
+        <ListView
+            android:transcriptMode="alwaysScroll"
+            android:id="@+id/desttext"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textView1"
+            app:layout_constraintTop_toTopOf="parent"></ListView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
