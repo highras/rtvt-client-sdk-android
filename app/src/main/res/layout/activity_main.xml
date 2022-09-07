@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@color/white"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".MainActivity">
 
 
@@ -66,12 +66,12 @@
             app:layout_constraintTop_toTopOf="parent"></TextView>
 
         <org.angmarch.views.NiceSpinner
-            app:backgroundSelector="@drawable/background_selector"
             android:id="@+id/srcspinner"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:overlapAnchor="false"
             app:arrowTint="@color/white"
+            app:backgroundSelector="@drawable/background_selector"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/srclangView"
             app:textTint="@color/white"
@@ -114,32 +114,33 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <Button
-        android:background="@drawable/colors"
         android:id="@+id/starttest"
         android:layout_width="129dp"
         android:layout_height="53dp"
         android:layout_marginTop="36dp"
+        android:background="@drawable/colors"
         android:text="开始测试"
         app:layout_constraintStart_toStartOf="@+id/srcconstraintLayout"
         app:layout_constraintTop_toBottomOf="@+id/srcconstraintLayout"></Button>
 
     <Button
-        app:layout_constraintStart_toStartOf="@id/constraintLayout2"
         android:id="@+id/endtest"
-        android:layout_width="109dp"
-        android:layout_height="42dp"
+        android:layout_width="129dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="64dp"
         android:background="@drawable/colors1"
-        android:layout_marginTop="64dp"
         android:text="结束测试"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2"
-        tools:layout_editor_absoluteX="12dp" />
+        app:layout_constraintBottom_toBottomOf="@+id/starttest"
+        app:layout_constraintStart_toEndOf="@+id/starttest"
+        app:layout_constraintTop_toTopOf="@+id/starttest"
+        app:layout_constraintVertical_bias="1.0" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
-        android:layout_marginEnd="15dp"
         android:layout_width="0dp"
         android:layout_height="130dp"
         android:layout_marginTop="25dp"
+        android:layout_marginEnd="15dp"
         android:background="@drawable/bg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/starttest"
@@ -165,12 +166,12 @@
             app:layout_constraintStart_toEndOf="@id/textView" />
 
         <ListView
-            android:transcriptMode="alwaysScroll"
             android:id="@+id/srctext"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginStart="5dp"
             android:textColor="@color/white"
+            android:transcriptMode="alwaysScroll"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/textView"
             tools:layout_editor_absoluteY="-10dp"></ListView>
@@ -207,12 +208,12 @@
             app:layout_constraintStart_toEndOf="@id/textView1" />
 
         <ListView
-            android:transcriptMode="alwaysScroll"
             android:id="@+id/desttext"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginStart="5dp"
             android:textColor="@color/white"
+            android:transcriptMode="alwaysScroll"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/textView1"
             app:layout_constraintTop_toTopOf="parent"></ListView>

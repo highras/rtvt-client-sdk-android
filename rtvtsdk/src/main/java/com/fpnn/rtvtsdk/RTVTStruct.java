@@ -18,6 +18,6 @@ public class RTVTStruct {
     }
 
     public static class VoiceStream extends RTVTAnswer{
-        public int streamId = 0;
+        public long streamId = 0;
     }
 }

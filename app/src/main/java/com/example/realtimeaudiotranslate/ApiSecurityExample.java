@@ -12,9 +12,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class ApiSecurityExample {
 
-    public static String genToken(long pid, String secret){
-        long time = System.currentTimeMillis()/1000;
-        String token = pid + ":" + time;
+    public static String genToken(long pid, String secret, long ts){
+        String token = pid + ":" + ts;
 
         String md5data = md5string(token);
 

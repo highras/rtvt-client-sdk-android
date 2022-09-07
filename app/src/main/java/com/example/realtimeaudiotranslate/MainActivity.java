@@ -126,7 +126,7 @@ public class MainActivity extends Activity {
     Button end;
     Button login;
     Button quit;
-    int streamId = 0;
+    long streamId = 0;
     long seq = 0;
     AudioTrackManager audioTrackManager;
     RTVTClient client;
@@ -238,15 +238,21 @@ public class MainActivity extends Activity {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String realToken = ApiSecurityExample.genToken(pid, mykey);
+                long ts = System.currentTimeMillis()/1000;
+                String realToken = ApiSecurityExample.genToken(pid, mykey, ts);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        client.login(realToken, System.currentTimeMillis()/1000, new RTVTUserInterface.IRTVTEmptyCallback() {
+                        client.login(realToken, ts, new RTVTUserInterface.IRTVTEmptyCallback() {
                             @Override
                             public void onResult(RTVTStruct.RTVTAnswer answer) {
+                                if (answer.errorCode == 0){
+                                    showToast(MainActivity.this, "login ok");
+                                }else
+                                {
+                                    showToast(MainActivity.this, "login " + answer.getErrInfo());
+                                }
                                 mylog.log(" login " + answer.getErrInfo());
-                                showToast(MainActivity.this, "login " + answer.getErrInfo());
                             }
                         });
                     }
@@ -258,8 +264,11 @@ public class MainActivity extends Activity {
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                stopTimer();
+                stopPlay();
+                running = false;
+
                 mylog.log("开始测试");
-//                srcarrayList.clear();
                 srcadapter.clear();
                 destadapter.clear();
                 timer = new Timer();

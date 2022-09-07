@@ -52,7 +52,7 @@ public class RTVTClient extends RTVTCore {
     public RTVTStruct.VoiceStream startStream(String srcLanguage, String destLanguage, boolean asrResult){
         VoiceStream ret = new VoiceStream();
         Quest quest = new Quest("voiceStart");
-        quest.param("asrResult", true);
+        quest.param("asrResult", asrResult);
         quest.param("srcLanguage", srcLanguage);
         quest.param("destLanguage", destLanguage);
         Answer answer = sendQuest(quest);
@@ -87,7 +87,7 @@ public class RTVTClient extends RTVTCore {
                 VoiceStream ret = new VoiceStream();
                 ret.errorCode = errorCode;
                 if (errorCode == okRet){
-                    ret.streamId = rtmUtils.wantInt(answer,"streamId");
+                    ret.streamId = rtmUtils.wantLong(answer,"streamId");
                 }
                 callback.onResult(ret, genRTVTAnswer(answer, errorCode));
             }
@@ -103,7 +103,7 @@ public class RTVTClient extends RTVTCore {
      * @param voiceDataTs 音频帧对应时间戳
      * @param callback
      */
-    public void sendVoice(int streamId, long seq, byte[] voicedata, long voiceDataTs, RTVTUserInterface.IRTVTEmptyCallback callback) {
+    public void sendVoice(long streamId, long seq, byte[] voicedata, long voiceDataTs, RTVTUserInterface.IRTVTEmptyCallback callback) {
         if (voicedata.length != 640){
             callback.onResult(genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_METHOD.value(), "please send 640 bytes length data"));
             return;
@@ -122,7 +122,7 @@ public class RTVTClient extends RTVTCore {
      * 停止本次翻译流 如需下次继续翻译需要再次调用startTranslate
      * @param streamId 翻译的流id
      */
-    public void stopTranslate(int streamId){
+    public void stopTranslate(long streamId){
         Quest quest = new Quest("voiceEnd");
         quest.param("streamId", streamId);
         sendQuestEmptyCallback(new RTVTUserInterface.IRTVTEmptyCallback() {
