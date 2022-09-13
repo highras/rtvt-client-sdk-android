@@ -32,7 +32,7 @@
 
     client.startTranslate("zh","en", true, IRTVTCallback<VoiceStream> callback)
     
-    client.sendVoice(int streamId, long seq, byte[] voicedata, UserInterface.IRTVTEmptyCallback callback) 
+    client.sendVoice(long streamId, long seq, byte[] voicedata, UserInterface.IRTVTEmptyCallback callback) 
 ~~~
 
 ##  接口说明
@@ -49,7 +49,7 @@
      * @param destLanguage 目标语言
      * @param asrResult (是否需要语音识别的结果。false: (default) 不需要; true: 需要
      *                  如果asrResult设置为false 那么只会推送翻译语言的文本 如果asrResult设置为true 那么会推送源语言和翻译语言两个结果
-     *                  翻译结果通过
+     *                  翻译结果通过translatedResult回调 源语言的识别结果通过recognizedResult回调
      * return VoiceStream
      */
     public RTVTStruct.VoiceStream startStream(String srcLanguage, String destLanguage, boolean asrResult)
@@ -63,14 +63,14 @@
      * @param voiceDataTs 音频帧对应时间戳
      * @param callback
      */
-    public void sendVoice(int streamId, long seq, byte[] voicedata, UserInterface.IRTVTEmptyCallback callback) 
+    public void sendVoice(long streamId, long seq, byte[] voicedata, UserInterface.IRTVTEmptyCallback callback) 
 
 
     /**
      * 停止本次翻译流 如需下次继续翻译需要再次调用startTranslate
      * @param streamId 翻译的流id
      */
-    public void stopTranslate(int streamId)
+    public void stopTranslate(long streamId)
 
 
     /** 释放rtmclient(释放资源,网络广播监听会持有RTVTClient对象 如果不调用RTVTClient对象会一直持有不释放)
