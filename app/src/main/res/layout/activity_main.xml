@@ -46,7 +46,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/srcconstraintLayout"
-        android:layout_width="160dp"
+        android:layout_width="170dp"
         android:layout_height="59dp"
         android:layout_marginStart="12dp"
         android:layout_marginTop="40dp"
@@ -61,13 +61,14 @@
             android:gravity="center"
             android:text="源语言"
             android:textColor="@color/colorAccent"
-            android:textSize="16dp"
+            android:textSize="14dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"></TextView>
 
         <org.angmarch.views.NiceSpinner
+            android:gravity="fill"
             android:id="@+id/srcspinner"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:overlapAnchor="false"
             app:arrowTint="@color/white"
@@ -81,9 +82,9 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout1"
-        android:layout_width="160dp"
+        android:layout_width="170dp"
         android:layout_height="59dp"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="10dp"
         android:background="@drawable/layoutback"
         app:layout_constraintBottom_toBottomOf="@+id/srcconstraintLayout"
         app:layout_constraintStart_toEndOf="@+id/srcconstraintLayout"
@@ -96,13 +97,13 @@
             android:gravity="center"
             android:text="目标语言"
             android:textColor="@color/colorAccent"
-            android:textSize="16dp"
+            android:textSize="14dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"></TextView>
 
         <org.angmarch.views.NiceSpinner
             android:id="@+id/destspinner"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:overlapAnchor="false"
             app:arrowTint="@color/white"
@@ -126,8 +127,8 @@
     <Button
         android:id="@+id/endtest"
         android:layout_width="129dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="64dp"
+        android:layout_height="53dp"
+        android:layout_marginStart="52dp"
         android:background="@drawable/colors1"
         android:text="结束测试"
         app:layout_constraintBottom_toBottomOf="@+id/starttest"
@@ -138,7 +139,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="0dp"
-        android:layout_height="130dp"
+        android:layout_height="140dp"
         android:layout_marginTop="25dp"
         android:layout_marginEnd="15dp"
         android:background="@drawable/bg"
@@ -181,7 +182,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout2"
         android:layout_width="0dp"
-        android:layout_height="130dp"
+        android:layout_height="140dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/bg"
         app:layout_constraintEnd_toEndOf="@id/constraintLayout"

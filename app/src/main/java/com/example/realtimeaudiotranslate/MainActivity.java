@@ -1,5 +1,4 @@
 package com.example.realtimeaudiotranslate;
-
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
@@ -25,7 +24,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
-
 
 public class MainActivity extends Activity {
 
@@ -131,18 +129,14 @@ public class MainActivity extends Activity {
     AudioTrackManager audioTrackManager;
     RTVTClient client;
     Timer timer = null;
-    byte [] zhData = null;
-    byte [] enData = null;
-    byte [] jaData = null;
-    byte [] thData = null;
-    byte [] voiceData = null;
+    byte [] pcmData = null;
     MediaPlayer mediaPlayer = new MediaPlayer();
     volatile  boolean running = true;
     ListView srcview;
     ListView destview;
     NiceSpinner srcspinner;
     NiceSpinner destspinner;
-
+    int fdopen = 0;
 
 
     private void stopTimer(){
@@ -162,6 +156,19 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void setPCMData(String name){
+        InputStream inputStream = null;
+
+        try {
+            inputStream = getAssets().open(name);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        byte[] wavdata = toByteArray(inputStream);
+        pcmData = new byte[wavdata.length - 44];
+        System.arraycopy(wavdata, 44,pcmData,0,wavdata.length - 44);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -169,28 +176,33 @@ public class MainActivity extends Activity {
         srcadapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, srcarrayList);
         destadapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, destarrayList);
 
+
         audioTrackManager = AudioTrackManager.getInstance();
         login = findViewById(R.id.login);
 
-        final LinkedList<CItem> lancode = new LinkedList<CItem>(){{
-            add(new CItem("中文","zh"));
-            add(new CItem("英文","en"));
-            add(new CItem("日文","ja"));
-//            add(new CItem("泰语","th"));
-        }
+        final LinkedList<CItem> langcode = new LinkedList<CItem>(){{
+            add(new CItem("简体中文","zh"));
+            add(new CItem("英语","en"));
+            add(new CItem("日语","ja"));
+            add(new CItem("泰语","th"));
+            add(new CItem("印尼语","id"));
+            add(new CItem("西语","es"));
+            add(new CItem("越南语","vi"));
+            add(new CItem("印地语","hi"));
+            add(new CItem("阿语","ar"));
+            add(new CItem("马来语","ms"));
+            }
         };
 
         srcview = findViewById(R.id.srctext);
         destview = findViewById(R.id.desttext);
-
-
         srcview.setAdapter(srcadapter);
         destview.setAdapter(destadapter);
 
         srcspinner = findViewById(R.id.srcspinner);
         destspinner = findViewById(R.id.destspinner);
-        srcspinner.attachDataSource(lancode);
-        destspinner.attachDataSource(lancode);
+        srcspinner.attachDataSource(langcode);
+        destspinner.attachDataSource(langcode);
 
         srcspinner.setSelectedIndex(0);
         destspinner.setSelectedIndex(0);
@@ -199,29 +211,6 @@ public class MainActivity extends Activity {
         end = findViewById(R.id.endtest);
         quit = findViewById(R.id.quit);
 
-        InputStream inputStream= null;
-        try {
-            byte[] wavdata = null;
-            inputStream = getAssets().open("中.wav");
-            wavdata = toByteArray(inputStream);
-            zhData = new byte[wavdata.length - 44];
-            System.arraycopy(wavdata, 44,zhData,0,wavdata.length - 44);
-
-            inputStream = getAssets().open("英.wav");
-            wavdata = toByteArray(inputStream);
-            enData = new byte[wavdata.length - 44];
-            System.arraycopy(wavdata, 44,enData,0,wavdata.length - 44);
-
-            inputStream = getAssets().open("日.wav");
-            wavdata = toByteArray(inputStream);
-            jaData = new byte[wavdata.length - 44];
-            System.arraycopy(wavdata, 44,jaData,0,wavdata.length - 44);
-            wavdata = null;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
         client = RTVTCenter.initRTMClient(endpoint, pid, uid, new demoPush(), this);
 
         quit.setOnClickListener(new View.OnClickListener() {
@@ -238,21 +227,15 @@ public class MainActivity extends Activity {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                long ts = System.currentTimeMillis()/1000;
-                String realToken = ApiSecurityExample.genToken(pid, mykey, ts);
+                String realToken = ApiSecurityExample.genToken(pid, mykey);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        client.login(realToken, ts, new RTVTUserInterface.IRTVTEmptyCallback() {
+                        client.login(realToken, System.currentTimeMillis()/1000, new RTVTUserInterface.IRTVTEmptyCallback() {
                             @Override
                             public void onResult(RTVTStruct.RTVTAnswer answer) {
-                                if (answer.errorCode == 0){
-                                    showToast(MainActivity.this, "login ok");
-                                }else
-                                {
-                                    showToast(MainActivity.this, "login " + answer.getErrInfo());
-                                }
                                 mylog.log(" login " + answer.getErrInfo());
+                                showToast(MainActivity.this, "login " + answer.getErrInfo());
                             }
                         });
                     }
@@ -264,40 +247,22 @@ public class MainActivity extends Activity {
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mylog.log("开始测试");
                 stopTimer();
                 stopPlay();
+                mylog.log("结束测试");
                 running = false;
 
-                mylog.log("开始测试");
+//                srcarrayList.clear();
                 srcadapter.clear();
                 destadapter.clear();
                 timer = new Timer();
 
                 String srclang = ((CItem)(srcspinner.getSelectedItem())).getValue();
                 String destlang = ((CItem)(destspinner.getSelectedItem())).getValue();
-                String playName = "";
-                if (srclang.equals("zh")) {
-                    voiceData = zhData;
-//                    playName = "zh.mp3";
-                    playName = "中.wav";
-                }
-                else if(srclang.equals("en")) {
-                    voiceData = enData;
-//                    playName = "en.mp3";
-                    playName = "英.wav";
-                }
-                else if(srclang.equals("ja")) {
-                    voiceData = jaData;
-//                    playName = "ja.mp3";
-                    playName = "日.wav";
-                }
-                else if(srclang.equals("th")) {
-                    voiceData = thData;
-//                    playName = "ja.mp3";
-                    playName = "泰.wav";
-                }
+                String playName = srclang + ".wav";
+                setPCMData(playName);
 
-                String finalPlayName = playName;
                 final int[] offset = {0};
                 client.startTranslate(srclang, destlang, true, new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
                     @Override
@@ -305,24 +270,15 @@ public class MainActivity extends Activity {
                         if (answer.errorCode == 0){
                             streamId = voiceStream.streamId;
                             byte[] voicedatatmp = new byte[readLen];
-                            byte [] writedata = new byte[audioTrackManager.mMinBufferSize];
                             final int[] i = {0};
 
                             timer.schedule(new TimerTask() {
                                 @Override
                                 public void run() {
-                                    if (offset[0] + readLen > voiceData.length)
+                                    if (offset[0] + readLen > pcmData.length)
                                         return;
                                     i[0] +=1;
-                                    System.arraycopy(voiceData, offset[0],voicedatatmp,0,readLen);
-/*                                    if (i[0] % 2  == 0){
-                                        System.arraycopy(voicedatatmp, 0 ,writedata,readLen,readLen);
-                                        audioTrackManager.write(writedata, 2*readLen);
-                                        java.util.Arrays.fill(writedata, (byte) 0);
-                                    }
-                                    else{
-                                        System.arraycopy(voicedatatmp, 0 ,writedata,0,readLen);
-                                    }*/
+                                    System.arraycopy(pcmData, offset[0],voicedatatmp,0,readLen);
 
                                     client.sendVoice(streamId, ++seq, voicedatatmp, System.currentTimeMillis(), new RTVTUserInterface.IRTVTEmptyCallback(){
                                         @Override
@@ -338,7 +294,7 @@ public class MainActivity extends Activity {
 
                             try {
                                 Thread.sleep(1000 *2);
-                                AssetFileDescriptor assetFileDescriptor = getApplicationContext().getAssets().openFd(finalPlayName);
+                                AssetFileDescriptor assetFileDescriptor = getApplicationContext().getAssets().openFd(playName);
                                 mediaPlayer = new MediaPlayer();
                                 mediaPlayer.setDataSource(assetFileDescriptor);
                                 mediaPlayer.prepare();
@@ -348,6 +304,10 @@ public class MainActivity extends Activity {
                                 return;
                             }
 
+                        }
+                        else{
+                            mylog.log("startTranslate failed " + answer.getErrInfo());
+                            showToast(MainActivity.this,"startTranslate failed " + answer.getErrInfo());
                         }
                     }
                 });
