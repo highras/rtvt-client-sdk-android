@@ -13,8 +13,11 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET"/>
     ~~~
+
 - 默认支持自动重连(请继承RTVTPushProcessor类的reloginWillStart和reloginCompleted方法)
 - 服务器push消息:请继承RTVTPushProcessor类,重写自己需要的push系列函数
+- 传入的pcm音频需要16000采样率 单声道  固定640字节
+- token的计算在demo中的  ApiSecurityExample.genToken(pid, key)方法
 
 
 ### 使用示例
