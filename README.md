@@ -14,10 +14,10 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     ~~~
 
-- 默认支持自动重连(请继承RTVTPushProcessor类的reloginWillStart和reloginCompleted方法)
+- 默认支持自动重连(请继承RTVTPushProcessor类的reloginWillStart和reloginCompleted方法，重连完成后需要重新调用 startTranslate方法)
+)
 - 服务器push消息:请继承RTVTPushProcessor类,重写自己需要的push系列函数
 - 传入的pcm音频需要16000采样率 单声道  固定640字节
-- token的计算在demo中的  ApiSecurityExample.genToken(pid, key)方法
 
 
 ### 使用示例
@@ -26,12 +26,9 @@
         ....//重写自己需要处理的业务接口
     }
     
-    client = RTVTCenter.initRTVTClient(endpoint, pid, uid, new demoPush(), this);
+    RTVTClient client = RTVTCenter.initRTVTClient(endpoint, pid, uid, new demoPush(), this);
 
-
-    RTVTClient client = new RTVTClient(String endpoint, long pid, long uid,new RTVTExampleQuestProcessor());
-    
-    client.login(String Token, long tokents, IRTVTEmptyCallback  callback)
+    client.login(String secretKey, IRTVTEmptyCallback  callback)
 
     client.startTranslate("zh","en", true, IRTVTCallback<VoiceStream> callback)
     
@@ -47,7 +44,7 @@
     public RTVTAnswer login(String token, long ts)
 
     /**
-     *开始实时翻译语音流(需要先login成功)
+     *开始实时翻译语音流(同步方法 需要先login成功)
      * @param srcLanguage 源语言
      * @param destLanguage 目标语言
      * @param asrResult (是否需要语音识别的结果。false: (default) 不需要; true: 需要
@@ -55,8 +52,19 @@
      *                  翻译结果通过translatedResult回调 源语言的识别结果通过recognizedResult回调
      * return VoiceStream
      */
-    public RTVTStruct.VoiceStream startStream(String srcLanguage, String destLanguage, boolean asrResult)
+    public RTVTStruct.VoiceStream startTranslate(String srcLanguage, String destLanguage, boolean asrResult)
 
+
+    /**
+     *开始实时翻译语音流(异步方法 需要先login成功)
+     * @param srcLanguage 源语言
+     * @param destLanguage 目标语言
+     * @param asrResult (是否需要语音识别的结果。false: (default) 不需要; true: 需要
+     *                  如果asrResult设置为false 那么只会推送翻译语言的文本 如果asrResult设置为true 那么会推送源语言和翻译语言两个结果
+     *                  翻译结果通过translatedResult回调 源语言的识别结果通过recognizedResult回调
+     * return VoiceStream
+     */
+    public void startTranslate(String srcLanguage, String destLanguage, boolean asrResult, final RTVTUserInterface.IRTVTCallback<VoiceStream> callback）
 
     /**
      * 发送语音片段

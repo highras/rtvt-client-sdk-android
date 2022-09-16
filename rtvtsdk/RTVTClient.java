@@ -17,7 +17,7 @@ public class RTVTClient extends RTVTCore {
      * @param currentActivity 当前Activity
      */
     protected RTVTClient(String rtmEndpoint, long pid, String uid, RTVTPushProcessor serverPushProcessor, Activity currentActivity) {
-        RTMInit(rtmEndpoint,pid, uid, serverPushProcessor,currentActivity);
+        RTVTInit(rtmEndpoint,pid, uid, serverPushProcessor,currentActivity);
     }
 
 
@@ -135,11 +135,11 @@ public class RTVTClient extends RTVTCore {
 
 
 
-    /** 释放rtmclient(释放资源,网络广播监听会持有RTMClient对象 如果不调用RTMClient对象会一直持有不释放)
-     * 如再次使用 需要重新调用RTMCenter.initRTMClient
+    /** 释放rtmclient(释放资源,网络广播监听会持有RTVTClient对象 如果不调用RTVTClient对象会一直持有不释放)
+     * 如再次使用 需要重新调用RTVTCenter.initRTVTClient
      */
-    public void closeRTM(){
+    public void closeRTVT(){
         realClose();
-        RTVTCenter.closeRTM(getPid(), getUid());
+        RTVTCenter.closeRTVT(getPid(), getUid());
     }
 }

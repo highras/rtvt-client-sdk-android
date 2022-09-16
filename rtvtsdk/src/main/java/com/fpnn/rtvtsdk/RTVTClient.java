@@ -11,32 +11,32 @@ public class RTVTClient extends RTVTCore {
 
     /**
      * 初始化
-     * @param rtmEndpoint
+     * @param rtvtEndpoint
      * @param pid
      * @param uid
      * @param currentActivity 当前Activity
      */
-    protected RTVTClient(String rtmEndpoint, long pid, String uid, RTVTPushProcessor serverPushProcessor, Activity currentActivity) {
-        RTMInit(rtmEndpoint,pid, uid, serverPushProcessor,currentActivity);
+    protected RTVTClient(String rtvtEndpoint, long pid, String uid, RTVTPushProcessor serverPushProcessor, Activity currentActivity) {
+        RTVTInit(rtvtEndpoint,pid, uid, serverPushProcessor,currentActivity);
     }
 
 
     /**
-     *rtm登陆  sync
-     * @param token     用户token
+     *rtvt登陆  sync
+     * @param secretKey   控制台获取的秘钥
      */
-    public RTVTAnswer login(String token, long ts) {
-        return super.login(token, ts);
+    public RTVTAnswer login(String secretKey) {
+        return super.login(secretKey);
     }
 
     /**
-     *rtm登陆  async
+     *rtvt登陆  async
+     * @param secretKey   控制台获取的秘钥
      * @param callback  登陆结果回调
-     * @param token     用户token
-     * @param ts      生成token的时间戳
+
      */
-    public void login( String token, long ts, RTVTUserInterface.IRTVTEmptyCallback callback) {
-        super.login(callback, ts, token);
+    public void login(String secretKey, RTVTUserInterface.IRTVTEmptyCallback callback) {
+        super.login(callback, secretKey);
     }
 
 
@@ -49,7 +49,7 @@ public class RTVTClient extends RTVTCore {
      *                  翻译结果通过
      * return VoiceStream
      */
-    public RTVTStruct.VoiceStream startStream(String srcLanguage, String destLanguage, boolean asrResult){
+    public RTVTStruct.VoiceStream startTranslate(String srcLanguage, String destLanguage, boolean asrResult){
         VoiceStream ret = new VoiceStream();
         Quest quest = new Quest("voiceStart");
         quest.param("asrResult", asrResult);
@@ -59,7 +59,7 @@ public class RTVTClient extends RTVTCore {
         ret.errorCode = answer.getErrorCode();
         ret.errorMsg = answer.getErrorMessage();
         if (answer.getErrorCode() == okRet){
-            ret.streamId = rtmUtils.wantInt("streamId");
+            ret.streamId = rtvtUtils.wantInt("streamId");
         }
         return  ret;
     }
@@ -87,7 +87,7 @@ public class RTVTClient extends RTVTCore {
                 VoiceStream ret = new VoiceStream();
                 ret.errorCode = errorCode;
                 if (errorCode == okRet){
-                    ret.streamId = rtmUtils.wantLong(answer,"streamId");
+                    ret.streamId = rtvtUtils.wantLong(answer,"streamId");
                 }
                 callback.onResult(ret, genRTVTAnswer(answer, errorCode));
             }
@@ -135,11 +135,11 @@ public class RTVTClient extends RTVTCore {
 
 
 
-    /** 释放rtmclient(释放资源,网络广播监听会持有RTMClient对象 如果不调用RTMClient对象会一直持有不释放)
-     * 如再次使用 需要重新调用RTMCenter.initRTMClient
+    /** 释放rtvtclient(释放资源,网络广播监听会持有RTVTClient对象 如果不调用RTVTClient对象会一直持有不释放)
+     * 如再次使用 需要重新调用RTVTCenter.initRTVTClient
      */
-    public void closeRTM(){
+    public void closeRTVT(){
         realClose();
-        RTVTCenter.closeRTM(getPid(), getUid());
+        RTVTCenter.closeRTVT(getPid(), getUid());
     }
 }

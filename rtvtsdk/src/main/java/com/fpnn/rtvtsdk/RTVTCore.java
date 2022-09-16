@@ -78,11 +78,9 @@ class RTVTCore extends BroadcastReceiver{
     private final Object interLocker =  new Object();
     private long pid;
     private String uid;
-    protected String lang;
-    private String token;
-    long ts = 0;
-    private String curve;
-    private String rtmEndpoint;
+    private String loginToken;
+    private long loginTs = 0;
+    private String rtvtEndpoint;
     private Context context;
     ErrorRecorder errorRecorder = new ErrorRecorder();
 
@@ -102,13 +100,13 @@ class RTVTCore extends BroadcastReceiver{
     private AtomicBoolean noNetWorkNotify = new AtomicBoolean(false);
     private RTVTAnswer lastReloginAnswer = new RTVTAnswer();
     private RTVTPushProcessor serverPushProcessor;
-    RTVTUtils rtmUtils = new RTVTUtils();
+    RTVTUtils rtvtUtils = new RTVTUtils();
 
     final int okRet = ErrorCode.FPNN_EC_OK.value();
 
     //voice
     //video
-    public enum RTMModel{
+    public enum RTVTModel{
         Normal,
         VOICE,
         VIDEO
@@ -116,18 +114,18 @@ class RTVTCore extends BroadcastReceiver{
 
     class RTVTQuestProcessor{
 
-        void rtmConnectClose() {
+        void rtvtConnectClose() {
             if (serverPushProcessor != null)
                 serverPushProcessor.rtvtConnectClose(uid);
         }
 
         Answer recognizedResult(Quest quest, InetSocketAddress peer){
             rttGate.sendAnswer(new Answer(quest));
-            String text = rtmUtils.wantString(quest, "asr");
-            int streamId = rtmUtils.wantInt(quest, "streamId");
-            int startTs = rtmUtils.wantInt(quest, "startTs");
-            int endTs = rtmUtils.wantInt(quest, "endTs");
-            int recTs = rtmUtils.wantInt(quest, "recTs");
+            String text = rtvtUtils.wantString(quest, "asr");
+            int streamId = rtvtUtils.wantInt(quest, "streamId");
+            int startTs = rtvtUtils.wantInt(quest, "startTs");
+            int endTs = rtvtUtils.wantInt(quest, "endTs");
+            int recTs = rtvtUtils.wantInt(quest, "recTs");
 
             serverPushProcessor.recognizedResult(streamId, startTs,endTs , recTs,text);
             return null;
@@ -136,11 +134,11 @@ class RTVTCore extends BroadcastReceiver{
         Answer translatedResult(Quest quest, InetSocketAddress peer){
 //            Log.i("sdktest","receive translatedResult");
             rttGate.sendAnswer(new Answer(quest));
-            String text = rtmUtils.wantString(quest, "trans");
-            int streamId = rtmUtils.wantInt(quest, "streamId");
-            int startTs = rtmUtils.wantInt(quest, "startTs");
-            int endTs = rtmUtils.wantInt(quest, "endTs");
-            int recTs = rtmUtils.wantInt(quest, "recTs");
+            String text = rtvtUtils.wantString(quest, "trans");
+            int streamId = rtvtUtils.wantInt(quest, "streamId");
+            int startTs = rtvtUtils.wantInt(quest, "startTs");
+            int endTs = rtvtUtils.wantInt(quest, "endTs");
+            int recTs = rtvtUtils.wantInt(quest, "recTs");
 
             serverPushProcessor.translatedResult(streamId, startTs,endTs , recTs, text);
             return null;
@@ -164,7 +162,7 @@ class RTVTCore extends BroadcastReceiver{
         int num = count;
         Map<String, String> kk = loginAttrs;
         if (serverPushProcessor.reloginWillStart(uid, num)) {
-            lastReloginAnswer = login(token, ts);
+            lastReloginAnswer = auth(loginToken, loginTs, false);
             if(lastReloginAnswer.errorCode == okRet) {
                 isRelogin.set(false);
                 internalReloginCompleted(uid, true, num);
@@ -265,10 +263,10 @@ class RTVTCore extends BroadcastReceiver{
     }
 
 
-    void RTMInit(String rtmendpoint, long pid, String uid, RTVTPushProcessor serverPushProcessor, Context appcontext) {
+    void RTVTInit(String rtvtendpoint, long pid, String uid, RTVTPushProcessor serverPushProcessor, Context appcontext) {
 
-        rtmUtils.errorRecorder = errorRecorder;
-        this.rtmEndpoint = rtmendpoint;
+        rtvtUtils.errorRecorder = errorRecorder;
+        this.rtvtEndpoint = rtvtendpoint;
 
         this.pid = pid;
         this.uid = uid;
@@ -278,7 +276,7 @@ class RTVTCore extends BroadcastReceiver{
 
         this.serverPushProcessor = serverPushProcessor;
 
-        context = appcontext;
+        context = appcontext.getApplicationContext();
         ClientEngine.setMaxThreadInTaskPool(globalMaxThread);
 
         try {
@@ -498,7 +496,7 @@ class RTVTCore extends BroadcastReceiver{
                 if (connectionId.get() != 0 && connectionId.get() == _connectionId && closedCase != CloseType.ByUser && closedCase != CloseType.ByServer && getClientStatus() != ClientStatus.Connecting) {
                     close();
 
-                    processor.rtmConnectClose();
+                    processor.rtvtConnectClose();
 
                     if (closedCase == CloseType.ByServer || isRelogin.get()) {
                         return;
@@ -549,7 +547,7 @@ class RTVTCore extends BroadcastReceiver{
                     conn.connect();
                     resultCode = conn.getResponseCode();
                 }catch (Exception ex){
-                    Log.i("rtmsdk","httprequest error " + resultCode);
+                    Log.i("rtvtsdk","httprequest error " + resultCode);
                 }
             }
         }).start();
@@ -559,7 +557,7 @@ class RTVTCore extends BroadcastReceiver{
     private void test80(String ipaddres, final IRTVTEmptyCallback callback){
         String realhost = ipaddres;
         if (ipaddres.isEmpty()) {
-            realhost = rtmEndpoint.split(":")[0];
+            realhost = rtvtEndpoint.split(":")[0];
             if (realhost == null || realhost.isEmpty()) {
                 callback.onResult(genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value()));
                 return;
@@ -572,8 +570,7 @@ class RTVTCore extends BroadcastReceiver{
         Quest qt = new Quest("login");
         qt.param("pid", pid);
         qt.param("uid", uid);
-        qt.param("token", token);
-        qt.param("lang", lang);
+        qt.param("token", loginToken);
         qt.param("version", "Android-" + SDKVersion);
         qt.param("device", deviceid);
 
@@ -586,7 +583,7 @@ class RTVTCore extends BroadcastReceiver{
 //            answer = new Answer(qt);
 //            answer.fillErrorCode(FPNN_EC_CORE_INVALID_CONNECTION.value());
             if (answer.getErrorCode() != ErrorCode.FPNN_EC_OK.value()){
-                String url = "https://" + rtmEndpoint.split(":")[0] + "/service/tcp-13321-fail-tcp-80-fail" + pid + "-" + uid;
+                String url = "https://" + rtvtEndpoint.split(":")[0] + "/service/tcp-13321-fail-tcp-80-fail" + pid + "-" + uid;
                 httpRequest(url);
                 callback.onResult(genRTVTAnswer(answer));
             }
@@ -638,8 +635,7 @@ class RTVTCore extends BroadcastReceiver{
         Quest qt = new Quest("login");
         qt.param("pid", pid);
         qt.param("uid", uid);
-        qt.param("token", token);
-        qt.param("lang", lang);
+        qt.param("token", loginToken);
         qt.param("version", "AndroidRTVT-" + SDKVersion);
         qt.param("device", deviceid);
 
@@ -652,7 +648,7 @@ class RTVTCore extends BroadcastReceiver{
 //            answer = new Answer(qt);
 //            answer.fillErrorCode(ErrorCode.FPNN_EC_CORE_INVALID_CONNECTION.value());
             if (answer.getErrorCode() != ErrorCode.FPNN_EC_OK.value()){
-                String url = "https://" + rtmEndpoint.split(":")[0] + "/service/tcp-13321-fail-tcp-80-fail" + pid + "-" + uid;
+                String url = "https://" + rtvtEndpoint.split(":")[0] + "/service/tcp-13321-fail-tcp-80-fail" + pid + "-" + uid;
                 httpRequest(url);
                 return genRTVTAnswer(answer);
             }
@@ -688,7 +684,7 @@ class RTVTCore extends BroadcastReceiver{
     }
 
     //------------voice add---------------//
-    private RTVTAnswer auth(String token, long ts, Map<String, String> attr, boolean retry) {
+    private RTVTAnswer auth(String token , long ts, boolean retry) {
         String deviceid = Build.BRAND + "-" + Build.MODEL;
         String sharedip = "";
 
@@ -696,13 +692,9 @@ class RTVTCore extends BroadcastReceiver{
         qt.param("pid", pid);
         qt.param("uid", uid);
         qt.param("token", token);
-        qt.param("lang", lang);
-        qt.param("tokenType", 1);
         qt.param("ts", ts);
         qt.param("version", "AndroidRTVT-" + SDKVersion);
 
-        if (attr != null)
-            qt.param("attrs", attr);
         try {
             Answer answer = rttGate.sendQuest(qt, globalQuestTimeoutSeconds);
 //            Answer answer = new Answer(qt);
@@ -715,7 +707,7 @@ class RTVTCore extends BroadcastReceiver{
                     InetSocketAddress peeraddres = rttGate.peerAddress;
                     if (peeraddres != null){
                         boolean isnetwork = isNetWorkConnected();
-                        String hostname = rtmEndpoint.split(":")[0];
+                        String hostname = rtvtEndpoint.split(":")[0];
                         if (peeraddres.getHostString().equals(hostname) && isnetwork && addressSp != null){
                             synchronized (addressSp){
                                 sharedip = addressSp.getString("addressip", "");
@@ -723,7 +715,7 @@ class RTVTCore extends BroadcastReceiver{
                             if (!sharedip.isEmpty()) {
                                 rttGate = new TCPClient(sharedip, peeraddres.getPort());
                                 ConfigRtmGateClient(rttGate);
-                                return auth(token, ts, attr,true);
+                                return auth(token, ts,true);
                             }
                         }
                         if (!isnetwork)
@@ -769,8 +761,6 @@ class RTVTCore extends BroadcastReceiver{
         qt.param("pid", pid);
         qt.param("uid", uid);
         qt.param("token", token);
-        qt.param("lang", lang);
-        qt.param("tokenType", 1);
         qt.param("ts", ts);
         qt.param("version", "AndroidRTVT-" + SDKVersion);
 
@@ -796,7 +786,7 @@ class RTVTCore extends BroadcastReceiver{
                             InetSocketAddress peeraddres = rttGate.peerAddress;
                             if (peeraddres != null){
                                 boolean isnetwork = isNetWorkConnected();
-                                String hostname = rtmEndpoint.split(":")[0];
+                                String hostname = rtvtEndpoint.split(":")[0];
                                 if (peeraddres.getHostString().equals(hostname) && isnetwork && addressSp != null){
                                     synchronized (addressSp){
                                         sharedip = addressSp.getString("addressip", "");
@@ -844,19 +834,19 @@ class RTVTCore extends BroadcastReceiver{
     }
 
 
-    void login(final IRTVTEmptyCallback callback, long ts, final String token) {
-        if (token ==null || token.isEmpty()){
-            callback.onResult(genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value()," token  is null or empty"));
+    void login(final IRTVTEmptyCallback callback, final String secretKey) {
+        if (secretKey ==null || secretKey.isEmpty()){
+            callback.onResult(genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(),"login failed secretKey  is null or empty"));
             return;
         }
 
         String errDesc = "";
-        if (rtmEndpoint == null || rtmEndpoint.isEmpty() || rtmEndpoint.lastIndexOf(':') == -1)
-            errDesc = "invalid rtmEndpoint:" + rtmEndpoint;
+        if (rtvtEndpoint == null || rtvtEndpoint.isEmpty() || rtvtEndpoint.lastIndexOf(':') == -1)
+            errDesc = "login failed invalid rtvtEndpoint:" + rtvtEndpoint;
         if (pid <= 0)
-            errDesc += " pid is invalid:" + pid;
+            errDesc += "login failed pid is invalid:" + pid;
         if (serverPushProcessor == null)
-            errDesc += " RTMMPushProcessor is null";
+            errDesc += "login failed RTVTMPushProcessor is null";
 
         if (!errDesc.equals("")) {
             callback.onResult(genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(), errDesc));
@@ -876,31 +866,33 @@ class RTVTCore extends BroadcastReceiver{
             rttGateStatus = ClientStatus.Connecting;
         }
 
+        long ts = System.currentTimeMillis()/1000;
+        String realToken = ApiSecurityExample.genToken(pid, secretKey);
+        this.loginToken = realToken;
+        this.loginTs = ts;
+
         if (rttGate != null) {
             rttGate.close();
-            auth(callback, token,ts, false);
+            auth(callback, realToken,ts, false);
         } else {
             try {
-                rttGate = TCPClient.create(rtmEndpoint);
+                rttGate = TCPClient.create(rtvtEndpoint);
             }
             catch (IllegalArgumentException ex){
-                callback.onResult(genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(),"create rtmgate error endpoint Illegal:" +ex.getMessage() + " :" +  rtmEndpoint ));
+                callback.onResult(genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(),"create rtvtgate error endpoint Illegal:" +ex.getMessage() + " :" +  rtvtEndpoint ));
                 return;
             }
             catch (Exception e){
-                String msg = "create rtmgate error orginal error:" + e.getMessage() + " endpoint: " + rtmEndpoint;
+                String msg = "create rtvtgate error orginal error:" + e.getMessage() + " endpoint: " + rtvtEndpoint;
                 if (rttGate != null)
                     msg = msg + " parse endpoint " + rttGate.endpoint();
                 callback.onResult(genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(),msg ));
                 return;
             }
-            this.token = token;
-            this.ts = ts;
-            if (lang == null)
-                this.lang = "";
+
             closedCase = CloseType.None;
             ConfigRtmGateClient(rttGate);
-            auth(callback, token, ts, false);
+            auth(callback, realToken, ts, false);
         }
     }
 
@@ -911,17 +903,18 @@ class RTVTCore extends BroadcastReceiver{
         }
     }
 
-    RTVTAnswer login(String token, long ts) {
-        if (token == null || token.isEmpty())
-            return genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(), "login failed token  is null or empty");
+    RTVTAnswer login(String secretKey) {
+
+        if (secretKey == null || secretKey.isEmpty())
+            return genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(), "login failed secretKey  is null or empty");
 
         String errDesc = "";
-        if (rtmEndpoint == null || rtmEndpoint.isEmpty() || rtmEndpoint.lastIndexOf(':') == -1)
-            errDesc = "invalid rtmEndpoint:" + rtmEndpoint;
+        if (rtvtEndpoint == null || rtvtEndpoint.isEmpty() || rtvtEndpoint.lastIndexOf(':') == -1)
+            errDesc = " login failed invalid rtvtEndpoint:" + rtvtEndpoint;
         if (pid <= 0)
-            errDesc += " pid is invalid:" + pid;
+            errDesc += " login failed pid is invalid:" + pid;
         if (serverPushProcessor == null)
-            errDesc += " RTMMPushProcessor is null";
+            errDesc += " login failed RTVTMPushProcessor is null";
 
         if (!errDesc.equals("")) {
             return genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(), errDesc);
@@ -934,30 +927,31 @@ class RTVTCore extends BroadcastReceiver{
             rttGateStatus = ClientStatus.Connecting;
         }
 
+        long ts = System.currentTimeMillis()/1000;
+        String realToken = ApiSecurityExample.genToken(pid, secretKey);
+        this.loginToken = realToken;
+        this.loginTs = ts;
+
         if (rttGate != null) {
             rttGate.close();
-            return auth(token, ts,null,false);
+            return auth(realToken, ts,false);
         } else {
             try {
-                rttGate = TCPClient.create(rtmEndpoint);
+                rttGate = TCPClient.create(rtvtEndpoint);
             }
             catch (IllegalArgumentException ex){
-                return genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(),"create rtmgate error endpoint Illegal:" +ex.getMessage() + " :" +  rtmEndpoint );
+                return genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(),"create rtvtgate error endpoint Illegal:" +ex.getMessage() + " :" +  rtvtEndpoint );
             }
             catch (Exception e){
-                String msg = "create rtmgate error orginal error:" + e.getMessage() + " endpoint: " + rtmEndpoint;
+                String msg = "create rtvtgate error orginal error:" + e.getMessage() + " endpoint: " + rtvtEndpoint;
                 if (rttGate != null)
                     msg = msg + " parse endpoint " + rttGate.endpoint();
                 return genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(),msg );
             }
-            this.token = token;
-            this.ts = ts;
-            if (lang == null)
-                this.lang = "";
-            this.token =  token;
+
             closedCase = CloseType.None;
             ConfigRtmGateClient(rttGate);
-            return auth(token, ts, null, false);
+            return auth(realToken, ts, false);
         }
     }
 

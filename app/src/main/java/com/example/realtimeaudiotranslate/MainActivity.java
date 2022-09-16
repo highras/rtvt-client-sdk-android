@@ -73,6 +73,14 @@ public class MainActivity extends Activity {
         @Override
         public void reloginCompleted(String uid, boolean successful, RTVTStruct.RTVTAnswer answer, int reloginCount) {
             mylog.log("重连结果 " + answer.getErrInfo());
+            if (answer.errorCode == 0){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        startTest();
+                    }
+                });
+            }
         }
 
 
@@ -104,6 +112,12 @@ public class MainActivity extends Activity {
         @Override
         public void rtvtConnectClose(String uid) {
             mylog.log("rtvt closed");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    stopAudio();
+                }
+            });
         }
     }
 
@@ -169,6 +183,79 @@ public class MainActivity extends Activity {
         System.arraycopy(wavdata, 44,pcmData,0,wavdata.length - 44);
     }
 
+
+
+    private void stopAudio() {
+        stopTimer();
+        stopPlay();
+        running = false;
+        srcadapter.clear();
+        destadapter.clear();
+        timer = new Timer();
+    }
+
+    private void startTest(){
+        mylog.log("开始测试");
+
+        stopAudio();
+
+        String srclang = ((CItem)(srcspinner.getSelectedItem())).getValue();
+        String destlang = ((CItem)(destspinner.getSelectedItem())).getValue();
+        String playName = srclang + ".wav";
+        setPCMData(playName);
+
+        final int[] offset = {0};
+        client.startTranslate(srclang, destlang, true, new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
+            @Override
+            public void onResult(RTVTStruct.VoiceStream voiceStream, RTVTStruct.RTVTAnswer answer) {
+                if (answer.errorCode == 0){
+                    streamId = voiceStream.streamId;
+                    byte[] voicedatatmp = new byte[readLen];
+                    final int[] i = {0};
+
+                    timer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            if (offset[0] + readLen > pcmData.length)
+                                return;
+                            i[0] +=1;
+                            System.arraycopy(pcmData, offset[0],voicedatatmp,0,readLen);
+
+                            client.sendVoice(streamId, ++seq, voicedatatmp, System.currentTimeMillis(), new RTVTUserInterface.IRTVTEmptyCallback(){
+                                @Override
+                                public void onResult(RTVTStruct.RTVTAnswer answer) {
+                                    if(answer.errorCode != 0){
+                                        mylog.log("sendVoice error " + answer.getErrInfo());
+                                    }
+                                }
+                            });
+                            offset[0] +=  readLen;
+                        }
+                    },0, 20);
+
+                    try {
+                        Thread.sleep(1000 *2);
+                        AssetFileDescriptor assetFileDescriptor = getApplicationContext().getAssets().openFd(playName);
+                        mediaPlayer = new MediaPlayer();
+                        mediaPlayer.setDataSource(assetFileDescriptor);
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return;
+                    }
+
+                }
+                else{
+                    mylog.log("startTranslate failed " + answer.getErrInfo());
+                    showToast(MainActivity.this,"startTranslate failed " + answer.getErrInfo());
+                }
+            }
+        });
+
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -211,14 +298,14 @@ public class MainActivity extends Activity {
         end = findViewById(R.id.endtest);
         quit = findViewById(R.id.quit);
 
-        client = RTVTCenter.initRTMClient(endpoint, pid, uid, new demoPush(), this);
+        client = RTVTCenter.initRTVTClient(endpoint, pid, uid, new demoPush(), this);
 
         quit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 stopTimer();
                 stopPlay();
-                client.closeRTM();
+                client.closeRTVT();
                 finish();
             }
         });
@@ -227,11 +314,10 @@ public class MainActivity extends Activity {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String realToken = ApiSecurityExample.genToken(pid, mykey);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        client.login(realToken, System.currentTimeMillis()/1000, new RTVTUserInterface.IRTVTEmptyCallback() {
+                        client.login(mykey, new RTVTUserInterface.IRTVTEmptyCallback() {
                             @Override
                             public void onResult(RTVTStruct.RTVTAnswer answer) {
                                 mylog.log(" login " + answer.getErrInfo());
@@ -244,76 +330,12 @@ public class MainActivity extends Activity {
         });
 
 
+
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mylog.log("开始测试");
-                stopTimer();
-                stopPlay();
-                mylog.log("结束测试");
-                running = false;
-
-//                srcarrayList.clear();
-                srcadapter.clear();
-                destadapter.clear();
-                timer = new Timer();
-
-                String srclang = ((CItem)(srcspinner.getSelectedItem())).getValue();
-                String destlang = ((CItem)(destspinner.getSelectedItem())).getValue();
-                String playName = srclang + ".wav";
-                setPCMData(playName);
-
-                final int[] offset = {0};
-                client.startTranslate(srclang, destlang, true, new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
-                    @Override
-                    public void onResult(RTVTStruct.VoiceStream voiceStream, RTVTStruct.RTVTAnswer answer) {
-                        if (answer.errorCode == 0){
-                            streamId = voiceStream.streamId;
-                            byte[] voicedatatmp = new byte[readLen];
-                            final int[] i = {0};
-
-                            timer.schedule(new TimerTask() {
-                                @Override
-                                public void run() {
-                                    if (offset[0] + readLen > pcmData.length)
-                                        return;
-                                    i[0] +=1;
-                                    System.arraycopy(pcmData, offset[0],voicedatatmp,0,readLen);
-
-                                    client.sendVoice(streamId, ++seq, voicedatatmp, System.currentTimeMillis(), new RTVTUserInterface.IRTVTEmptyCallback(){
-                                        @Override
-                                        public void onResult(RTVTStruct.RTVTAnswer answer) {
-                                            if(answer.errorCode != 0){
-                                                mylog.log("sendVoice error " + answer.getErrInfo());
-                                            }
-                                        }
-                                    });
-                                    offset[0] +=  readLen;
-                                }
-                            },0, 20);
-
-                            try {
-                                Thread.sleep(1000 *2);
-                                AssetFileDescriptor assetFileDescriptor = getApplicationContext().getAssets().openFd(playName);
-                                mediaPlayer = new MediaPlayer();
-                                mediaPlayer.setDataSource(assetFileDescriptor);
-                                mediaPlayer.prepare();
-                                mediaPlayer.start();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                return;
-                            }
-
-                        }
-                        else{
-                            mylog.log("startTranslate failed " + answer.getErrInfo());
-                            showToast(MainActivity.this,"startTranslate failed " + answer.getErrInfo());
-                        }
-                    }
-                });
-
-            }
-        });
+             startTest();
+        }});
 
 
 
@@ -344,7 +366,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        client.closeRTM();
+        client.closeRTVT();
     }
 
     private  byte[] toByteArray(InputStream input) {

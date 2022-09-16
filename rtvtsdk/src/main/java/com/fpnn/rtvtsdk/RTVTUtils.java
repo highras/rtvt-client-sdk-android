@@ -258,7 +258,7 @@ public class RTVTUtils {
         }
         catch (NoSuchElementException e)
         {
-//            Log.e("rtmsdk","wantLong NoSuchElementException " + key);
+//            Log.e("rtvtsdk","wantLong NoSuchElementException " + key);
             errorRecorder.recordError("wantLong NoSuchElementException " + key);
         }
         return value;
