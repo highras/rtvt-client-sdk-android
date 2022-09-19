@@ -38,10 +38,10 @@
 ##  接口说明
 ~~~
     /**
-     *rtm登陆  sync
-     * @param token     用户token
+     *rtvt登陆  sync
+     * @param secretKey   控制台获取的秘钥
      */
-    public RTVTAnswer login(String token, long ts)
+    public RTVTAnswer login(String secretKey)
 
     /**
      *开始实时翻译语音流(同步方法 需要先login成功)
