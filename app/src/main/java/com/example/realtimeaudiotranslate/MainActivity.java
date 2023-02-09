@@ -139,7 +139,7 @@ public class MainActivity extends Activity {
     String  endpoint = "rtvt.ilivedata.com:14001";
 //    String  endpoint = "69.234.232.26:14001";
     String uid = "hello";
-    String mykey = "qwerty";
+    String mykey = "cXdlcnR5";
     Button start;
     Button end;
     Button login;
@@ -383,7 +383,7 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         long ts = System.currentTimeMillis()/1000;
-                        String realToken = ApiSecurityExample.genToken(pid, mykey);
+                        String realToken = ApiSecurityExample.genHMACToken(pid, ts, mykey);
 
                         client.login(realToken, ts, new RTVTUserInterface.IRTVTEmptyCallback() {
                             @Override

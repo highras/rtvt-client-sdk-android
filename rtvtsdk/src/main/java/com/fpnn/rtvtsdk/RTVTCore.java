@@ -738,6 +738,11 @@ class RTVTCore extends BroadcastReceiver{
                     return genRTVTAnswer(answer,"when send sync auth ");
 
             }
+            boolean success = rtvtUtils.wantBoolean(answer,"successed");
+            if (!success){
+                return genRTVTAnswer( 800005, "token is invalid " );
+            }
+
             synchronized (interLocker) {
                 rttGateStatus = ClientStatus.Connected;
             }
@@ -816,6 +821,11 @@ class RTVTCore extends BroadcastReceiver{
                             return;
                         }
                     } else {
+                        boolean success = rtvtUtils.wantBoolean(answer,"successed");
+                        if (!success){
+                            callback.onResult(genRTVTAnswer( 800005, "token is invalid " ));
+                            return;
+                        }
                         synchronized (interLocker) {
                             rttGateStatus = ClientStatus.Connected;
                         }
