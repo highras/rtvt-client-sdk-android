@@ -1,10 +1,6 @@
 package com.example.realtimeaudiotranslate;
 
-import android.util.Base64;
-
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 
 import javax.crypto.Mac;

@@ -1,5 +1,7 @@
 package com.fpnn.rtvtsdk;
 
+import static com.fpnn.sdk.ErrorCode.FPNN_EC_CORE_INVALID_CONNECTION;
+
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,6 +13,9 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
+
+import com.fpnn.rtvtsdk.RTVTStruct.RTVTAnswer;
+import com.fpnn.rtvtsdk.RTVTUserInterface.IRTVTEmptyCallback;
 import com.fpnn.sdk.ClientEngine;
 import com.fpnn.sdk.ConnectionWillCloseCallback;
 import com.fpnn.sdk.ErrorCode;
@@ -30,9 +35,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.net.ssl.HttpsURLConnection;
-import com.fpnn.rtvtsdk.RTVTUserInterface.*;
-import com.fpnn.rtvtsdk.RTVTStruct.*;
-import static com.fpnn.sdk.ErrorCode.FPNN_EC_CORE_INVALID_CONNECTION;
 
 class RTVTCore extends BroadcastReceiver{
 
@@ -276,7 +278,7 @@ class RTVTCore extends BroadcastReceiver{
 
         this.serverPushProcessor = serverPushProcessor;
 
-        context = appcontext.getApplicationContext();
+        context = appcontext;
         ClientEngine.setMaxThreadInTaskPool(globalMaxThread);
 
         try {
@@ -768,7 +770,6 @@ class RTVTCore extends BroadcastReceiver{
             @SuppressLint("NewApi")
             @Override
             public void onAnswer(Answer answer, int errorCode) {
-                try {
                     String sharedip = "";
 //                    rttGate.close();
 //                    answer = new Answer(qt);
@@ -786,6 +787,10 @@ class RTVTCore extends BroadcastReceiver{
                             InetSocketAddress peeraddres = rttGate.peerAddress;
                             if (peeraddres != null){
                                 boolean isnetwork = isNetWorkConnected();
+                                if (rtvtEndpoint.split(":") == null){
+                                    callback.onResult(genRTVTAnswer( ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(), "when send async auth  failed: rtvtEndpoint invalid " + rtvtEndpoint));
+                                    return;
+                                }
                                 String hostname = rtvtEndpoint.split(":")[0];
                                 if (peeraddres.getHostString().equals(hostname) && isnetwork && addressSp != null){
                                     synchronized (addressSp){
@@ -825,17 +830,13 @@ class RTVTCore extends BroadcastReceiver{
                         connectionId.set(rttGate.getConnectionId());
                         callback.onResult(genRTVTAnswer(errorCode));
                     }
-                }
-                catch (Exception e){
-                    callback.onResult(genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(),"when async auth " + e.getMessage()));
-                }
             }
         }, globalQuestTimeoutSeconds);
     }
 
 
-    void login(final IRTVTEmptyCallback callback, final String secretKey) {
-        if (secretKey ==null || secretKey.isEmpty()){
+    void login(final IRTVTEmptyCallback callback, final String token, long ts) {
+        if (token ==null || token.isEmpty()){
             callback.onResult(genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(),"login failed secretKey  is null or empty"));
             return;
         }
@@ -866,14 +867,12 @@ class RTVTCore extends BroadcastReceiver{
             rttGateStatus = ClientStatus.Connecting;
         }
 
-        long ts = System.currentTimeMillis()/1000;
-        String realToken = ApiSecurityExample.genToken(pid, secretKey);
-        this.loginToken = realToken;
+        this.loginToken = token;
         this.loginTs = ts;
 
         if (rttGate != null) {
             rttGate.close();
-            auth(callback, realToken,ts, false);
+            auth(callback, token,ts, false);
         } else {
             try {
                 rttGate = TCPClient.create(rtvtEndpoint);
@@ -883,6 +882,7 @@ class RTVTCore extends BroadcastReceiver{
                 return;
             }
             catch (Exception e){
+                e.printStackTrace();
                 String msg = "create rtvtgate error orginal error:" + e.getMessage() + " endpoint: " + rtvtEndpoint;
                 if (rttGate != null)
                     msg = msg + " parse endpoint " + rttGate.endpoint();
@@ -892,20 +892,19 @@ class RTVTCore extends BroadcastReceiver{
 
             closedCase = CloseType.None;
             ConfigRtmGateClient(rttGate);
-            auth(callback, realToken, ts, false);
+            auth(callback, token, ts, false);
         }
     }
 
-    private  void closeStatus()
-    {
+    private  void closeStatus() {
         synchronized (interLocker) {
             rttGateStatus = ClientStatus.Closed;
         }
     }
 
-    RTVTAnswer login(String secretKey) {
 
-        if (secretKey == null || secretKey.isEmpty())
+    RTVTAnswer login(String token, long ts) {
+        if (token == null || token.isEmpty())
             return genRTVTAnswer(ErrorCode.FPNN_EC_CORE_UNKNOWN_ERROR.value(), "login failed secretKey  is null or empty");
 
         String errDesc = "";
@@ -927,14 +926,13 @@ class RTVTCore extends BroadcastReceiver{
             rttGateStatus = ClientStatus.Connecting;
         }
 
-        long ts = System.currentTimeMillis()/1000;
-        String realToken = ApiSecurityExample.genToken(pid, secretKey);
-        this.loginToken = realToken;
+
+        this.loginToken = token;
         this.loginTs = ts;
 
         if (rttGate != null) {
             rttGate.close();
-            return auth(realToken, ts,false);
+            return auth(loginToken, ts,false);
         } else {
             try {
                 rttGate = TCPClient.create(rtvtEndpoint);
@@ -951,7 +949,7 @@ class RTVTCore extends BroadcastReceiver{
 
             closedCase = CloseType.None;
             ConfigRtmGateClient(rttGate);
-            return auth(realToken, ts, false);
+            return auth(loginToken, ts, false);
         }
     }
 

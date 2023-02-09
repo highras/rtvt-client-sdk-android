@@ -1,55 +1,75 @@
 package com.fpnn.rtvtsdk;
 
-import android.app.Activity;
+import android.content.Context;
 
+import com.fpnn.rtvtsdk.RTVTStruct.RTVTAnswer;
+import com.fpnn.rtvtsdk.RTVTStruct.VoiceStream;
 import com.fpnn.sdk.ErrorCode;
 import com.fpnn.sdk.FunctionalAnswerCallback;
 import com.fpnn.sdk.proto.Answer;
 import com.fpnn.sdk.proto.Quest;
-import com.fpnn.rtvtsdk.RTVTStruct.*;
+
+import java.util.HashMap;
+
 public class RTVTClient extends RTVTCore {
 
+    static HashMap<String ,RTVTClient> clients = new HashMap<>();
     /**
-     * 初始化
+     * 创建rtvtclient
      * @param rtvtEndpoint
-     * @param pid
-     * @param uid
-     * @param currentActivity 当前Activity
+     * @param pid 项目id
+     * @param uid 用户id
+     * @param applicationContext 应用的appContext
      */
-    protected RTVTClient(String rtvtEndpoint, long pid, String uid, RTVTPushProcessor serverPushProcessor, Activity currentActivity) {
-        RTVTInit(rtvtEndpoint,pid, uid, serverPushProcessor,currentActivity);
+    public static RTVTClient CreateClient(String rtvtEndpoint, long pid, String uid, RTVTPushProcessor pushProcessor, Context applicationContext) {
+        String findKey = pid + ":" + uid;
+        synchronized (clients) {
+            if (clients.containsKey(findKey)) {
+                return clients.get(findKey);
+            } else {
+                RTVTClient client = new RTVTClient(rtvtEndpoint, pid, uid, pushProcessor, applicationContext);
+                clients.put(findKey, client);
+                return client;
+            }
+        }
+    }
+
+    protected RTVTClient(String rtvtEndpoint, long pid, String uid, RTVTPushProcessor serverPushProcessor, Context applicationContext) {
+        RTVTInit(rtvtEndpoint,pid, uid, serverPushProcessor,applicationContext);
     }
 
 
     /**
-     *rtvt登陆  sync
-     * @param secretKey   控制台获取的秘钥
+     *rtvt登陆
+     * @param token   计算的token
+     * @param ts   生成的token时间戳
      */
-    public RTVTAnswer login(String secretKey) {
-        return super.login(secretKey);
+    public RTVTAnswer login(String token, long ts) {
+        return super.login(token, ts);
     }
 
     /**
      *rtvt登陆  async
-     * @param secretKey   控制台获取的秘钥
+     * @param token   计算的token
+     * @param ts   生成的token时间戳
      * @param callback  登陆结果回调
 
      */
-    public void login(String secretKey, RTVTUserInterface.IRTVTEmptyCallback callback) {
-        super.login(callback, secretKey);
+    public void login(String token, long ts,  RTVTUserInterface.IRTVTEmptyCallback callback) {
+        super.login(callback, token, ts);
     }
 
 
     /**
-     *开始实时翻译语音流(需要先login成功)
+     *开始实时翻译语音流(同步方法 需要先login成功)
      * @param srcLanguage 源语言
      * @param destLanguage 目标语言
      * @param asrResult (是否需要语音识别的结果。false: (default) 不需要; true: 需要
      *                  如果asrResult设置为false 那么只会推送翻译语言的文本 如果asrResult设置为true 那么会推送源语言和翻译语言两个结果
-     *                  翻译结果通过
+     *                  翻译结果通过translatedResult回调 源语言的识别结果通过recognizedResult回调
      * return VoiceStream
      */
-    public RTVTStruct.VoiceStream startTranslate(String srcLanguage, String destLanguage, boolean asrResult){
+    public VoiceStream startTranslate(String srcLanguage, String destLanguage, boolean asrResult){
         VoiceStream ret = new VoiceStream();
         Quest quest = new Quest("voiceStart");
         quest.param("asrResult", asrResult);
@@ -59,7 +79,7 @@ public class RTVTClient extends RTVTCore {
         ret.errorCode = answer.getErrorCode();
         ret.errorMsg = answer.getErrorMessage();
         if (answer.getErrorCode() == okRet){
-            ret.streamId = rtvtUtils.wantInt("streamId");
+            ret.streamId = rtvtUtils.wantLong(answer,"streamId");
         }
         return  ret;
     }
@@ -71,7 +91,7 @@ public class RTVTClient extends RTVTCore {
      * @param destLanguage 目标语言
      * @param asrResult (是否需要语音识别的结果。false: (default) 不需要; true: 需要
      *                  如果asrResult设置为false 那么只会推送翻译语言的文本 如果asrResult设置为true 那么会推送源语言和翻译语言两个结果
-     *                  翻译结果通过
+     *                  翻译结果通过translatedResult回调 源语言的识别结果通过recognizedResult回调
      * return VoiceStream
      */
     public void startTranslate(String srcLanguage, String destLanguage, boolean asrResult, final RTVTUserInterface.IRTVTCallback<VoiceStream> callback){
@@ -140,6 +160,9 @@ public class RTVTClient extends RTVTCore {
      */
     public void closeRTVT(){
         realClose();
-        RTVTCenter.closeRTVT(getPid(), getUid());
+        synchronized (clients){
+            String findkey = getPid() + ":" + getUid();
+            clients.remove(findkey);
+        }
     }
 }

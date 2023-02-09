@@ -33,13 +33,16 @@
     client.startTranslate("zh","en", true, IRTVTCallback<VoiceStream> callback)
     
     client.sendVoice(long streamId, long seq, byte[] voicedata, UserInterface.IRTVTEmptyCallback callback) 
+    
+    client.stopTranslate(streamId)
 ~~~
 
 ##  接口说明
 ~~~
     /**
-     *rtvt登陆  sync
-     * @param secretKey   控制台获取的秘钥
+     *rtvt登陆
+     * @param token   计算的token
+     * @param ts   生成的token时间戳
      */
     public RTVTAnswer login(String secretKey)
 
