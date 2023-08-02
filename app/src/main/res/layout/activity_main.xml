@@ -8,6 +8,17 @@
     tools:context=".MainActivity">
 
 
+    <Button
+        android:id="@+id/logbtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:enabled="true"
+        android:text="日志"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <org.angmarch.views.NiceSpinner
         android:id="@+id/testtype"
         android:layout_width="150dp"
@@ -15,6 +26,7 @@
         android:layout_marginEnd="16dp"
         android:gravity="fill"
         android:overlapAnchor="false"
+        android:visibility="visible"
         app:arrowTint="@color/white"
         app:backgroundSelector="@drawable/background_selector"
         app:layout_constraintBottom_toBottomOf="@+id/quit"
@@ -23,10 +35,10 @@
         app:textTint="@color/white" />
 
     <Button
-        android:layout_marginStart="10dp"
         android:id="@+id/quit"
         android:layout_width="80dp"
         android:layout_height="45dp"
+        android:layout_marginStart="10dp"
         android:background="@drawable/colors1"
         android:text="退出"
         app:layout_constraintBottom_toBottomOf="@+id/login"
