@@ -52,7 +52,7 @@
         android:layout_width="80dp"
         android:layout_height="45dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="0dp"
         android:background="@drawable/colors"
         android:text="登录"
         app:layout_constraintStart_toStartOf="parent"
@@ -74,7 +74,7 @@
         android:id="@+id/srcconstraintLayout"
         android:layout_width="170dp"
         android:layout_height="59dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="15dp"
         android:background="@drawable/layoutback"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/login">
@@ -143,7 +143,7 @@
         android:id="@+id/starttest"
         android:layout_width="129dp"
         android:layout_height="53dp"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="15dp"
         android:background="@drawable/colors"
         android:text="开始测试"
         app:layout_constraintStart_toStartOf="@+id/srcconstraintLayout"
@@ -164,9 +164,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="0dp"
-        android:layout_height="140dp"
-        android:layout_marginTop="25dp"
-        android:layout_marginEnd="15dp"
+        android:layout_height="170dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
         android:background="@drawable/bg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/starttest"
@@ -178,7 +178,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="源文本"
+            android:text="识别\n结果"
             android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="parent"
             tools:layout_editor_absoluteY="5dp"></TextView>
@@ -205,10 +205,10 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout2"
+        android:id="@+id/tempconstraintLayout"
         android:layout_width="0dp"
-        android:layout_height="140dp"
-        android:layout_marginTop="20dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="10dp"
         android:background="@drawable/bg"
         app:layout_constraintEnd_toEndOf="@id/constraintLayout"
         app:layout_constraintStart_toStartOf="@id/constraintLayout"
@@ -216,11 +216,54 @@
 
 
         <TextView
+            android:id="@+id/textView12"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="临时\n结果"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="5dp"></TextView>
+
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:background="#FFBA66"
+            app:layout_constraintStart_toEndOf="@id/textView12" />
+
+        <TextView
+            android:gravity="center"
+            android:textSize="14dp"
+            android:id="@+id/temptext"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textView12"
+            app:layout_constraintTop_toTopOf="parent"></TextView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/tempconstraintLayout"
+        app:layout_constraintStart_toStartOf="@id/tempconstraintLayout"
+        app:layout_constraintTop_toBottomOf="@+id/tempconstraintLayout">
+
+
+        <TextView
             android:id="@+id/textView1"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="翻译文本"
+            android:text="翻译\n结果"
             android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="parent"
             tools:layout_editor_absoluteY="5dp"></TextView>

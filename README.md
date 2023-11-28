@@ -47,25 +47,13 @@
     public RTVTAnswer login(String secretKey)
 
     /**
-     *开始实时翻译语音流(同步方法 需要先login成功)
+     *开始实时翻译语音流(需要先login成功)
      * @param srcLanguage 源语言
      * @param destLanguage 目标语言
-     * @param asrResult (是否需要语音识别的结果。false: (default) 不需要; true: 需要
-     *                  如果asrResult设置为false 那么只会推送翻译语言的文本 如果asrResult设置为true 那么会推送源语言和翻译语言两个结果
-     *                  翻译结果通过translatedResult回调 源语言的识别结果通过recognizedResult回调
-     * return VoiceStream
-     */
-    public RTVTStruct.VoiceStream startTranslate(String srcLanguage, String destLanguage, boolean asrResult)
-
-
-    /**
-     *开始实时翻译语音流(异步方法 需要先login成功)
-     * @param srcLanguage 源语言
-     * @param destLanguage 目标语言
-     * @param asrResult (是否需要语音识别的结果。false: (default) 不需要; true: 需要
-     *                  如果asrResult设置为false 那么只会推送翻译语言的文本 如果asrResult设置为true 那么会推送源语言和翻译语言两个结果
-     *                  翻译结果通过translatedResult回调 源语言的识别结果通过recognizedResult回调
-     * return VoiceStream
+     * @param srcAltLanguage 备选语言列表
+     * @param asrResult (是否需要语音识别的结果。如果设置为true 识别结果通过recognizedResult回调
+     * @param asrTempResult 是否需要临时识别结果 如果设置为true 临时识别结果通过recognizedTempResult回调
+     * @param transResult 是否需要翻译结果 如果设置为true 翻译结果通过translatedResult回调
      */
     public void startTranslate(String srcLanguage, String destLanguage, boolean asrResult, final RTVTUserInterface.IRTVTCallback<VoiceStream> callback）
 
