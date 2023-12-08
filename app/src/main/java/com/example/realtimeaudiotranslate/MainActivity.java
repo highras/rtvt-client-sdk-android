@@ -350,7 +350,7 @@ public class MainActivity extends Activity {
             }
 
             final int[] offset = {0};
-            client.startTranslate(srclang, destlang, beixuan, true, false, true, new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
+            client.startTranslate(srclang, destlang, beixuan, true, true, true, new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
                 @Override
                 public void onError(RTVTStruct.RTVTAnswer answer) {
                     String msg = "startTranslate failed " + answer.getErrInfo();

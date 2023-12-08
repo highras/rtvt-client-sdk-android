@@ -14,11 +14,16 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     ~~~
 
-- 默认支持自动重连(请继承RTVTPushProcessor类的reloginWillStart和reloginCompleted方法，重连完成后需要重新调用 startTranslate方法)
-)
+- 默认支持自动重连 (请继承RTVTPushProcessor类的reloginWillStart和reloginCompleted方法，重连完成后需要重新调用 startTranslate方法)
 - 服务器push消息:请继承RTVTPushProcessor类,重写自己需要的push系列函数
 - 传入的pcm音频需要16000采样率 单声道  固定640字节
-
+- 错误码
+  800001-未验证的链接
+  800002-登陆失败
+  800003-token已过期
+  800004-无效的验证时间
+  800005-无效token
+  800006-音频流不存在
 
 ### 使用示例
  ~~~
@@ -26,7 +31,7 @@
         ....//重写自己需要处理的业务接口
     }
     
-    RTVTClient client = RTVTCenter.initRTVTClient(endpoint, pid, uid, new demoPush(), this);
+    RTVTClient client = RTVTCenter.CreateClient(String rtvtEndpoint, long pid, String uid, RTVTPushProcessor pushProcessor, Context applicationContext)
 
     client.login(String secretKey, IRTVTEmptyCallback  callback)
 
