@@ -85,7 +85,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="源语言"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/colorground"
             android:textSize="14dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"></TextView>
@@ -121,7 +121,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="目标语言"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/colorground"
             android:textSize="14dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"></TextView>

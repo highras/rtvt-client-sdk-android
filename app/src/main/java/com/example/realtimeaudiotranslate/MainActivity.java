@@ -193,7 +193,7 @@ public class MainActivity extends Activity {
     }
 
     final HashMap<String, CItem> allLanguage = new HashMap<String,CItem>(){{
-        put("zh",new CItem("简体中文","zh"));
+        put("zh",new CItem("普通话","zh"));
         put("en",new CItem("英语","en"));
         put("ja",new CItem("日语","ja"));
         put("th",new CItem("泰语","th"));
@@ -204,6 +204,12 @@ public class MainActivity extends Activity {
         put("hi",new CItem("印地语","hi"));
         put("ar",new CItem("阿语","ar"));
         put("ms",new CItem("马来语","ms"));
+        put("ko",new CItem("韩语","ko"));
+        put("tr",new CItem("土耳其语","tr"));
+        put("de",new CItem("德语","de"));
+        put("it",new CItem("意大利语","it"));
+        put("ru",new CItem("俄语","ru"));
+        put("fr",new CItem("法语","fr"));
 //        put("auto",new CItem("自动","auto"));
     }
     };
