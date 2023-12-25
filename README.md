@@ -31,11 +31,11 @@
         ....//重写自己需要处理的业务接口
     }
     
-    RTVTClient client = RTVTCenter.CreateClient(String rtvtEndpoint, long pid, String uid, RTVTPushProcessor pushProcessor, Context applicationContext)
+    client = RTVTClient.CreateClient(endpoint, pid, new demoPush(), this.getApplicationContext());
 
     client.login(String secretKey, IRTVTEmptyCallback  callback)
 
-    client.startTranslate("zh","en", true, IRTVTCallback<VoiceStream> callback)
+    client.startTranslate("zh", "en", null, true, false, true, "123456",new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() 
     
     client.sendVoice(long streamId, long seq, byte[] voicedata, UserInterface.IRTVTEmptyCallback callback) 
     
@@ -47,30 +47,39 @@
     /**
      *rtvt登陆
      * @param token   计算的token
-     * @param ts   生成的token时间戳
      */
-    public RTVTAnswer login(String secretKey)
+    public RTVTAnswer login(String token, long ts)
+
+    /**
+     *rtvt登陆  async
+     * @param token   计算的token
+     * @param callback  登陆结果回调
+     */
+    public void login(final String token, final long ts, final RTVTUserInterface.IRTVTEmptyCallback callback)
+
 
     /**
      *开始实时翻译语音流(需要先login成功)
-     * @param srcLanguage 源语言
-     * @param destLanguage 目标语言
-     * @param srcAltLanguage 备选语言列表
-     * @param asrResult (是否需要语音识别的结果。如果设置为true 识别结果通过recognizedResult回调
-     * @param asrTempResult 是否需要临时识别结果 如果设置为true 临时识别结果通过recognizedTempResult回调
+     * @param srcLanguage 源语言(必传)
+     * @param destLanguage 翻译的目标语言 (如果不需要翻译 可空)
+     * @param srcAltLanguage 备选语言列表(可空 如果传了备选语言 会有3秒自动语种识别 第一句返回的识别和翻译时长会变大）
+     * @param asrResult 是否需要语音识别的结果。如果设置为true 识别结果通过recognizedResult回调
+     * @param asrTempResult 是否需要临时识别结果 如果设置为true 临时识别结果通过recognizedTempResult回调(临时识别结果 用于长句快速的返回)
      * @param transResult 是否需要翻译结果 如果设置为true 翻译结果通过translatedResult回调
+     * @param userId  后台显示便于查询 （业务端可以和返回的streamid绑定）
      */
-    public void startTranslate(String srcLanguage, String destLanguage, boolean asrResult, final RTVTUserInterface.IRTVTCallback<VoiceStream> callback）
+    public void startTranslate(String srcLanguage, String destLanguage, List<String> srcAltLanguage, boolean asrResult, boolean asrTempResult, boolean transResult,String userId, final RTVTUserInterface.IRTVTCallback<VoiceStream> callback)
+
 
     /**
      * 发送语音片段
-     * @param streamId 翻译流id
+     * @param streamId (startTranslate返回的流id）
      * @param seq   语音片段序号(尽量有序)
-     * @param voicedata 语音数据
+     * @param voicedata 语音数据（传入的pcm音频需要16000采样率 单声道 固定640字节）
      * @param voiceDataTs 音频帧对应时间戳
      * @param callback
      */
-    public void sendVoice(long streamId, long seq, byte[] voicedata, UserInterface.IRTVTEmptyCallback callback) 
+    public void sendVoice(long streamId, long seq, byte[] voicedata, long voiceDataTs, RTVTUserInterface.IRTVTEmptyCallback callback)
 
 
     /**
@@ -80,7 +89,7 @@
     public void stopTranslate(long streamId)
 
 
-    /** 释放rtmclient(释放资源,网络广播监听会持有RTVTClient对象 如果不调用RTVTClient对象会一直持有不释放)
+    /** 释放rtvtclient(释放资源,网络广播监听会持有RTVTClient对象 如果不调用RTVTClient对象会一直持有不释放)
      * 如再次使用 需要重新调用RTVTCenter.initRTVTClient
      */
     public void closeRTVT()

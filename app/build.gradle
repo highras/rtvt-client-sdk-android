@@ -4,24 +4,31 @@ plugins {
 
 android {
     signingConfigs {
-        release {
-            storePassword '123456'
-            keyAlias 'key0'
-            keyPassword '123456'
-            storeFile file('/Users/mayajun/Downloads/Bitbucket/infra-fpnn-rtm-client-sdk/RealTimeAudioTranslate/Untitled')
-        }
+    release {
+//        storeFile file('/Users/admin/Downloads/Bitbucket-highras/infra-fpnn-rtm-client-sdk/Android-RTVT/rtvtkeys')
+        storeFile file('D:\\Bitbucket\\infra-fpnn-rtm-client-sdk\\Android-RTVT\\rtvtkeys')
+        storePassword '123456'
+        keyAlias 'keyrtvt'
+        keyPassword '123456'
+    }
     }
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
+
+
+    aaptOptions{
+        ignoreAssets "*.wav"
+    }
 
     defaultConfig {
         applicationId "com.example.realtimeaudiotranslate"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 1
-        versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        versionCode 17
+        versionName "1.17"
+
+        signingConfig signingConfigs.release
     }
 
     buildTypes {
@@ -38,9 +45,14 @@ android {
 }
 
 dependencies {
+//    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation fileTree(include: ['*.jar','*.aar'], dir: 'libs')
-    implementation 'androidx.appcompat:appcompat:1.4.2'
-    implementation 'com.google.android.material:material:1.6.1'
+//    implementation fileTree(include: ['*.jar'], dir: 'libs')
+//    implementation project(path: ':rtvtsdk')
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'com.google.android.material:material:1.6.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'com.github.arcadefire:nice-spinner:1.4'
+//    implementation project(path: ':rtcaudio')
+//    implementation 'com.github.highras:rtvt-android:1.0.0'
 }

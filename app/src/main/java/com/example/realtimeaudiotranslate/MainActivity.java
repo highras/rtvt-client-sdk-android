@@ -120,12 +120,12 @@ public class MainActivity extends Activity {
 
     class demoPush extends RTVTPushProcessor {
         @Override
-        public boolean reloginWillStart(String uid, int reloginCount) {
+        public boolean reloginWillStart(int reloginCount) {
             return  true;
         }
 
         @Override
-        public void reloginCompleted(String uid, boolean successful, RTVTStruct.RTVTAnswer answer, int reloginCount) {
+        public void reloginCompleted(boolean successful, RTVTStruct.RTVTAnswer answer, int reloginCount) {
             showToast(MainActivity.this, "重连结果 " + answer.getErrInfo());
             if (answer.errorCode == 0){
                 addlog("rtvt 重连成功");
@@ -180,7 +180,7 @@ public class MainActivity extends Activity {
 
 
         @Override
-        public void rtvtConnectClose(String uid) {
+        public void rtvtConnectClose() {
             addlog("rtvt closed");
             showToast(MainActivity.this, "rtvt closed");
             runOnUiThread(new Runnable() {
@@ -211,7 +211,7 @@ public class MainActivity extends Activity {
         put("ru",new CItem("俄语","ru"));
         put("fr",new CItem("法语","fr"));
 //        put("auto",new CItem("自动","auto"));
-    }
+        }
     };
 
     ArrayList<String> srcarrayList = new ArrayList<>();
@@ -356,7 +356,7 @@ public class MainActivity extends Activity {
             }
 
             final int[] offset = {0};
-            client.startTranslate(srclang, destlang, beixuan, true, true, true, new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
+            client.startTranslate(srclang, destlang, beixuan, true, false, true, "123456",new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
                 @Override
                 public void onError(RTVTStruct.RTVTAnswer answer) {
                     String msg = "startTranslate failed " + answer.getErrInfo();
@@ -420,7 +420,7 @@ public class MainActivity extends Activity {
                 }
             });
         }else if (type.equals("1")){
-            client.startTranslate(srclang, destlang, beixuan, true, true, true, new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
+            client.startTranslate(srclang, destlang, beixuan, true, true, true, "123456",new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
                 @Override
                 public void onError(RTVTStruct.RTVTAnswer answer) {
                     String msg = "startTranslate failed " + answer.getErrInfo();
@@ -491,7 +491,7 @@ public class MainActivity extends Activity {
         temptext = findViewById(R.id.temptext);
 
         final LinkedList<CItem> testtypedata = new LinkedList<CItem>(){{
-            add(new CItem("使用文件测试","0"));
+//            add(new CItem("使用文件测试","0"));
             add(new CItem("使用录音测试","1"));
             }
         };
@@ -511,7 +511,7 @@ public class MainActivity extends Activity {
         destspinner.setSelectedIndex(0);
 
         testtype.attachDataSource(testtypedata);
-        testtype.setSelectedIndex(1);
+        testtype.setSelectedIndex(0);
 //        testtype.setSelectedIndex(0);
 
         start = findViewById(R.id.starttest);
@@ -520,7 +520,7 @@ public class MainActivity extends Activity {
         logbtn = findViewById(R.id.logbtn);
 
 //        client = RTVTCenter.initRTVTClient(endpoint, pid, uid, new demoPush(), this.getApplicationContext());
-        client = RTVTClient.CreateClient(endpoint, pid, uid, new demoPush(), this.getApplicationContext());
+        client = RTVTClient.CreateClient(endpoint, pid, new demoPush(), this.getApplicationContext());
 
         logbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -545,42 +545,74 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 LoadingDialog.getInstance(mycontext).show();
 
-                new Thread(new Runnable() {
+                long ts = System.currentTimeMillis()/1000;
+                String realToken = ApiSecurityExample.genHMACToken(pid, ts, mykey);
+
+                client.login(realToken, ts, new RTVTUserInterface.IRTVTEmptyCallback() {
                     @Override
-                    public void run() {
-                        long ts = System.currentTimeMillis()/1000;
-                        String realToken = ApiSecurityExample.genHMACToken(pid, ts, mykey);
-
-                        client.login(realToken, ts, new RTVTUserInterface.IRTVTEmptyCallback() {
+                    public void onError(RTVTStruct.RTVTAnswer answer) {
+                        runOnUiThread(new Runnable() {
                             @Override
-                            public void onError(RTVTStruct.RTVTAnswer answer) {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        LoadingDialog.getInstance(getApplicationContext()).dismiss();//隐藏
-                                        String msg = "login failed " + answer.getErrInfo();
-                                        showToast(MainActivity.this, msg);
-                                        addlog(msg);
-                                    }
-                                });
-
+                            public void run() {
+                                LoadingDialog.getInstance(getApplicationContext()).dismiss();//隐藏
+                                String msg = "login failed " + answer.getErrInfo();
+                                showToast(MainActivity.this, msg);
+                                addlog(msg);
                             }
+                        });
 
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        runOnUiThread(new Runnable() {
                             @Override
-                            public void onSuccess() {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        LoadingDialog.getInstance(getApplicationContext()).dismiss();//隐藏
-                                        showToast(MainActivity.this, "login ok");
-                                        addlog("login ok");
-                                    }
-                                });
+                            public void run() {
+                                LoadingDialog.getInstance(getApplicationContext()).dismiss();//隐藏
+                                showToast(MainActivity.this, "login ok");
+                                addlog("login ok");
                             }
                         });
                     }
-                }).start();
+                });
             }
+
+//                new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        long ts = System.currentTimeMillis()/1000;
+//                        String realToken = ApiSecurityExample.genHMACToken(pid, ts, mykey);
+//
+//                        client.login(realToken, ts, new RTVTUserInterface.IRTVTEmptyCallback() {
+//                            @Override
+//                            public void onError(RTVTStruct.RTVTAnswer answer) {
+//                                runOnUiThread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        LoadingDialog.getInstance(getApplicationContext()).dismiss();//隐藏
+//                                        String msg = "login failed " + answer.getErrInfo();
+//                                        showToast(MainActivity.this, msg);
+//                                        addlog(msg);
+//                                    }
+//                                });
+//
+//                            }
+//
+//                            @Override
+//                            public void onSuccess() {
+//                                runOnUiThread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        LoadingDialog.getInstance(getApplicationContext()).dismiss();//隐藏
+//                                        showToast(MainActivity.this, "login ok");
+//                                        addlog("login ok");
+//                                    }
+//                                });
+//                            }
+//                        });
+//                    }
+//                }).start();
+//            }
         });
 
 
@@ -628,6 +660,18 @@ public class MainActivity extends Activity {
             }
         }
         getLangs();
+
+//        List<String> testlist = new ArrayList<>();
+//        testlist = null;
+//        try {
+//            mylog.log(testlist.size() + "");
+//        }
+//        catch (Exception ex){
+//            String errmsg = "异常了 " +ex.getMessage();
+//            String errmsg1 = "异常了 " +ex;
+//            mylog.log(errmsg);
+//            mylog.log(errmsg1);
+//        }
     }
 
 
@@ -650,6 +694,9 @@ public class MainActivity extends Activity {
                             for(String value:obj){
                                 if (allLanguage.get(value) != null)
                                     langcode.add(allLanguage.get(value));
+                                else{
+                                    langcode.add(new CItem(value,value));
+                                }
                             }
                             if (!langcode.isEmpty()){
                                 runOnUiThread(new Runnable() {
