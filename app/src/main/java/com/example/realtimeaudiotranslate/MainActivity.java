@@ -144,7 +144,7 @@ public class MainActivity extends Activity {
 
 
         @Override
-        public void recognizedResult(int streamId, int startTs, int endTs, int recTs, String srcVoiceText) {
+        public void recognizedResult(long streamId, long startTs, long endTs, long recTs, String srcVoiceText) {
             mylog.log("stream id:" + streamId + " recognizedResult:" + srcVoiceText);
             runOnUiThread(new Runnable() {
                 @Override
@@ -156,7 +156,7 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void translatedResult(int streamId, int startTs, int endTs, int recTs, String destVoiceText) {
+        public void translatedResult(long streamId, long startTs, long endTs, long recTs, String destVoiceText) {
             mylog.log("stream id:" + streamId + " translatedResult:" + destVoiceText);
             runOnUiThread(new Runnable() {
                 @Override
@@ -168,8 +168,7 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void recognizedTempResult(int streamId, int startTs, int endTs, int recTs, String srcVoiceText) {
-            mylog.log("stream id:" + streamId + " recognizedTempResult:" + srcVoiceText);
+        public void recognizedTempResult(long streamId, long startTs, long endTs, long recTs, String srcVoiceText) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -229,7 +228,6 @@ public class MainActivity extends Activity {
     long pid = 81700051;
     String mykey = "MDlmMzBkNDItYThlMS00ZWVjLTgxZDMtOWZhMzg3YWNiNDQz";
     String  endpoint = "rtvt.ilivedata.com:14001";
-//    String  endpoint = "152.136.123.168:14001";
     String uid = "hello";
     Button start;
     Button end;

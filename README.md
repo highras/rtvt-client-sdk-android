@@ -31,7 +31,7 @@
         ....//重写自己需要处理的业务接口
     }
     
-    client = RTVTClient.CreateClient(endpoint, pid, new demoPush(), this.getApplicationContext());
+    client = RTVTClient.CreateClient(endpoint, pid, new RTVTExampleQuestProcessor(), this.getApplicationContext());
 
     client.login(String secretKey, IRTVTEmptyCallback  callback)
 
