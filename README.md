@@ -17,6 +17,7 @@
 - 默认支持自动重连 (请继承RTVTPushProcessor类的reloginWillStart和reloginCompleted方法，重连完成后需要重新调用 startTranslate方法)
 - 服务器push消息:请继承RTVTPushProcessor类,重写自己需要的push系列函数
 - 传入的pcm音频需要16000采样率 单声道  固定640字节
+- 收到链接断开事件后 之前开始的streamid就会失效 需要链接成功后重新调用startTranslate获取新的streamid
 - 错误码
   800001-未验证的链接
   800002-登陆失败
@@ -31,7 +32,7 @@
         ....//重写自己需要处理的业务接口
     }
     
-    client = RTVTClient.CreateClient(endpoint, pid, new RTVTExampleQuestProcessor(), this.getApplicationContext());
+    client = RTVTClient.CreateClient(endpoint, pid, new demoPush(), this.getApplicationContext());
 
     client.login(String secretKey, IRTVTEmptyCallback  callback)
 
