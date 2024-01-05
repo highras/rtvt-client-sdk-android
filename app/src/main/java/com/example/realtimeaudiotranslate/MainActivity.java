@@ -156,7 +156,7 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void translatedResult(long streamId, long startTs, long endTs, long recTs, String destVoiceText) {
+        public void translatedResult(long streamId, long startTs, long endTs, long recTs, String lan, String destVoiceText) {
             mylog.log("stream id:" + streamId + " translatedResult:" + destVoiceText);
             runOnUiThread(new Runnable() {
                 @Override
@@ -331,6 +331,16 @@ public class MainActivity extends Activity {
     }
 
     private void startTest(){
+        if (!client.isOnline()){
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setMessage("请先login成功").setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            builder.show();
+            return;
+        }
         stopAudio();
 
         String srclang = ((CItem)(srcspinner.getSelectedItem())).getValue();
