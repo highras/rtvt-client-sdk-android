@@ -7,16 +7,21 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.method.ScrollingMovementMethod;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -37,6 +42,7 @@ import com.fpnn.sdk.proto.Quest;
 import com.livedata.rtc.RTCEngine;
 
 import org.angmarch.views.NiceSpinner;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -57,6 +63,13 @@ import java.util.TimerTask;
 public class MainActivity extends Activity {
     ArrayList<String> realLog =  new ArrayList<>();
 
+//    long pid =0 ;
+//    String endpoint = "";
+//    String key = "";
+
+    long pid = 81700051;
+    String endpoint = "rtvt.ilivedata.com:14001";
+    String key = "MDlmMzBkNDItYThlMS00ZWVjLTgxZDMtOWZhMzg3YWNiNDQz";
     List<String> beixuan = new ArrayList<String>()
 //    {{
 //        add("en");
@@ -126,7 +139,7 @@ public class MainActivity extends Activity {
 
         @Override
         public void reloginCompleted(boolean successful, RTVTStruct.RTVTAnswer answer, int reloginCount) {
-            showToast(MainActivity.this, "重连结果 " + answer.getErrInfo());
+            showToast((Activity) mycontext, "重连结果 " + answer.getErrInfo());
             if (answer.errorCode == 0){
                 addlog("rtvt 重连成功");
                 if (streamId == 0)
@@ -142,37 +155,139 @@ public class MainActivity extends Activity {
             }
         }
 
-
         @Override
-        public void recognizedResult(long streamId, long startTs, long endTs, long recTs, String srcVoiceText) {
-            mylog.log("stream id:" + streamId + " recognizedResult:" + srcVoiceText);
+        public void translatedTempResult(long streamId, long startTs, long endTs, long recTs, String language, String destVoiceText) {
+            JSONObject tt = new JSONObject();
+            try {
+                tt.put("streamId", streamId);
+                tt.put("startTs", startTs);
+                tt.put("endTs", endTs);
+                tt.put("recTs", recTs);
+                tt.put("lan", language);
+                tt.put("result", destVoiceText);
+            }
+            catch (Exception ex){
+
+            }
+
+            mylog.log("translatedTempResult:" + tt);
+            SpannableString srctext = new SpannableString(destVoiceText);
+            srctext.setSpan(new ForegroundColorSpan(Color.BLUE),0, destVoiceText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    srcarrayList.add(srcVoiceText);
-                    srcadapter.notifyDataSetChanged();
-                }
-            });
-        }
-
-        @Override
-        public void translatedResult(long streamId, long startTs, long endTs, long recTs, String lan, String destVoiceText) {
-            mylog.log("stream id:" + streamId + " translatedResult:" + destVoiceText);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    destarrayList.add(destVoiceText);
+                    synchronized (destarrayList){
+                        if (destarrayList.size() == 0){
+                            destarrayList.add(srctext);
+                        }else {
+                            destarrayList.set(destarrayList.size() - 1, srctext);
+                        }
+                    }
                     destadapter.notifyDataSetChanged();
                 }
             });
         }
 
         @Override
-        public void recognizedTempResult(long streamId, long startTs, long endTs, long recTs, String srcVoiceText) {
+        public void translatedResult(long streamId, long startTs, long endTs, long recTs, String lan, String destVoiceText) {
+            JSONObject tt = new JSONObject();
+            try {
+                tt.put("streamId", streamId);
+                tt.put("startTs", startTs);
+                tt.put("endTs", endTs);
+                tt.put("recTs", recTs);
+                tt.put("lan", lan);
+                tt.put("result", destVoiceText);
+            }
+            catch (Exception ex){
+
+            }
+
+            mylog.log("translatedResult:" + tt);
+            SpannableString realtext = new SpannableString(destVoiceText);
+            realtext.setSpan(new ForegroundColorSpan(Color.BLACK),0, destVoiceText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    temptext.setText(srcVoiceText);
+                    synchronized (destarrayList) {
+                        if (destarrayList.size() == 0){
+                            destarrayList.add(realtext);
+                        }else{
+                            destarrayList.add(destarrayList.size() - 1, realtext);
+                        }
+                    }
+                    destadapter.notifyDataSetChanged();
+                }
+            });
+        }
+
+        @Override
+        public void recognizedTempResult(long streamId, long startTs, long endTs, long recTs, String language,String srcVoiceText) {
+            JSONObject tt = new JSONObject();
+            try {
+                tt.put("streamId", streamId);
+                tt.put("startTs", startTs);
+                tt.put("endTs", endTs);
+                tt.put("recTs", recTs);
+                tt.put("lan", language);
+                tt.put("result", srcVoiceText);
+            }
+            catch (Exception ex){
+
+            }
+//            if (srcVoiceText.isEmpty())
+//                return;
+            mylog.log("recognizedTempResult:" + tt);
+            SpannableString srctext = new SpannableString(srcVoiceText);
+            srctext.setSpan(new ForegroundColorSpan(Color.BLUE),0, srcVoiceText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (srcarrayList){
+                        if (srcarrayList.size() == 0){
+                            srcarrayList.add(srctext);
+                        }else {
+                            srcarrayList.set(srcarrayList.size() - 1, srctext);
+                        }
+                    }
+                    srcadapter.notifyDataSetChanged();
+                }
+            });
+        }
+
+
+
+        @Override
+        public void recognizedResult(long streamId, long startTs, long endTs, long recTs, String language,String srcVoiceText) {
+            JSONObject tt = new JSONObject();
+            try {
+                tt.put("streamId", streamId);
+                tt.put("startTs", startTs);
+                tt.put("endTs", endTs);
+                tt.put("recTs", recTs);
+                tt.put("lan", language);
+                tt.put("result", srcVoiceText);
+            }
+            catch (Exception ex){
+
+            }
+
+
+            mylog.log("recognizedResult:" + tt);
+            SpannableString realtext = new SpannableString(srcVoiceText);
+            realtext.setSpan(new ForegroundColorSpan(Color.BLACK),0, srcVoiceText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    synchronized (srcarrayList) {
+                        if (srcarrayList.size() == 0){
+                            srcarrayList.add(realtext);
+                        }else{
+                            srcarrayList.add(srcarrayList.size() - 1, realtext);
+                        }
+                    }
+                    srcadapter.notifyDataSetChanged();
                 }
             });
         }
@@ -213,21 +328,17 @@ public class MainActivity extends Activity {
         }
     };
 
-    ArrayList<String> srcarrayList = new ArrayList<>();
-    TextView temptext;
+    ArrayList<SpannableString> srcarrayList = new ArrayList<>();
 //    ArrayAdapter srcadapter;
 //    ArrayAdapter destadapter;
 
     MyAdapter srcadapter;
     MyAdapter destadapter;
 
-    ArrayList<String> destarrayList = new ArrayList<>();
+    ArrayList<SpannableString> destarrayList = new ArrayList<>();
     int REQUEST_CODE_CONTACT = 101;
 
     int readLen = 640;
-    long pid = 81700051;
-    String mykey = "MDlmMzBkNDItYThlMS00ZWVjLTgxZDMtOWZhMzg3YWNiNDQz";
-    String  endpoint = "rtvt.ilivedata.com:14001";
     String uid = "hello";
     Button start;
     Button end;
@@ -323,15 +434,16 @@ public class MainActivity extends Activity {
         stopPlay();
         seq = 0;
         running = false;
+        srcarrayList.clear();
+        destarrayList.clear();
         srcadapter.clear();
-        temptext.setText("");
         destadapter.clear();
         timer = new Timer();
         RTCEngine.setVoiceStat(false);
     }
 
     private void startTest(){
-        if (!client.isOnline()){
+        if (client==null || !client.isOnline()){
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setMessage("请先login成功").setPositiveButton("确定", new DialogInterface.OnClickListener() {
                 @Override
@@ -345,10 +457,26 @@ public class MainActivity extends Activity {
 
         String srclang = ((CItem)(srcspinner.getSelectedItem())).getValue();
         String destlang = ((CItem)(destspinner.getSelectedItem())).getValue();
-        String type = ((CItem)(testtype.getSelectedItem())).getValue();
         showToast(MainActivity.this, "开始测试");
+        client.startTranslate(srclang, destlang, beixuan, true, true, true, "123456",new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
+            @Override
+            public void onError(RTVTStruct.RTVTAnswer answer) {
+                String msg = "startTranslate failed " + answer.getErrInfo();
+                mylog.log(msg);
+                addlog(msg);
+
+                showToast(MainActivity.this,msg);
+            }
+
+            @Override
+            public void onSuccess(RTVTStruct.VoiceStream voiceStream) {
+                addlog("startTranslate ok");
+                streamId = voiceStream.streamId;
+                RTCEngine.setVoiceStat(true);
+            }
+        });
         String msg = "";
-        if (type.equals("0")){
+/*        if (type.equals("0")){
             String playName = srclang + ".wav";
             msg = setPCMData(playName);
 
@@ -364,7 +492,7 @@ public class MainActivity extends Activity {
             }
 
             final int[] offset = {0};
-            client.startTranslate(srclang, destlang, beixuan, true, false, true, "123456",new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
+            client.startTranslate(srclang, destlang, beixuan, true, true, true, "123456",new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
                 @Override
                 public void onError(RTVTStruct.RTVTAnswer answer) {
                     String msg = "startTranslate failed " + answer.getErrInfo();
@@ -445,7 +573,7 @@ public class MainActivity extends Activity {
                     RTCEngine.setVoiceStat(true);
                 }
             });
-        }
+        }*/
     }
 
 
@@ -496,13 +624,12 @@ public class MainActivity extends Activity {
         destadapter = new MyAdapter(this, android.R.layout.simple_list_item_1, destarrayList);
         audioTrackManager = AudioTrackManager.getInstance();
         login = findViewById(R.id.login);
-        temptext = findViewById(R.id.temptext);
 
-        final LinkedList<CItem> testtypedata = new LinkedList<CItem>(){{
-//            add(new CItem("使用文件测试","0"));
-            add(new CItem("使用录音测试","1"));
-            }
-        };
+//        final LinkedList<CItem> testtypedata = new LinkedList<CItem>(){{
+//            add(new CItem("测试环境","0"));
+//            add(new CItem("使用录音测试","1"));
+//            }
+//        };
 
         mycontext = this;
         srcview = findViewById(R.id.srctext);
@@ -513,22 +640,14 @@ public class MainActivity extends Activity {
 
         srcspinner = findViewById(R.id.srcspinner);
         destspinner = findViewById(R.id.destspinner);
-        testtype = findViewById(R.id.testtype);
 
         srcspinner.setSelectedIndex(0);
         destspinner.setSelectedIndex(0);
-
-        testtype.attachDataSource(testtypedata);
-        testtype.setSelectedIndex(0);
-//        testtype.setSelectedIndex(0);
 
         start = findViewById(R.id.starttest);
         end = findViewById(R.id.endtest);
         quit = findViewById(R.id.quit);
         logbtn = findViewById(R.id.logbtn);
-
-//        client = RTVTCenter.initRTVTClient(endpoint, pid, uid, new demoPush(), this.getApplicationContext());
-        client = RTVTClient.CreateClient(endpoint, pid, new demoPush(), this.getApplicationContext());
 
         logbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -541,7 +660,8 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 stopTimer();
                 stopPlay();
-                client.closeRTVT();
+                if (client!=null)
+                    client.closeRTVT();
                 System.exit(0);
 //                finish();
             }
@@ -552,9 +672,11 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 LoadingDialog.getInstance(mycontext).show();
-
-                long ts = System.currentTimeMillis()/1000;
-                String realToken = ApiSecurityExample.genHMACToken(pid, ts, mykey);
+                if (client!= null)
+                    client.closeRTVT();
+                client = RTVTClient.CreateClient(endpoint, pid, new demoPush(), mycontext.getApplicationContext());
+                long ts = System.currentTimeMillis() / 1000;
+                String realToken = ApiSecurityExample.genHMACToken(pid, ts, key);
 
                 client.login(realToken, ts, new RTVTUserInterface.IRTVTEmptyCallback() {
                     @Override
@@ -584,43 +706,6 @@ public class MainActivity extends Activity {
                     }
                 });
             }
-
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        long ts = System.currentTimeMillis()/1000;
-//                        String realToken = ApiSecurityExample.genHMACToken(pid, ts, mykey);
-//
-//                        client.login(realToken, ts, new RTVTUserInterface.IRTVTEmptyCallback() {
-//                            @Override
-//                            public void onError(RTVTStruct.RTVTAnswer answer) {
-//                                runOnUiThread(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        LoadingDialog.getInstance(getApplicationContext()).dismiss();//隐藏
-//                                        String msg = "login failed " + answer.getErrInfo();
-//                                        showToast(MainActivity.this, msg);
-//                                        addlog(msg);
-//                                    }
-//                                });
-//
-//                            }
-//
-//                            @Override
-//                            public void onSuccess() {
-//                                runOnUiThread(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        LoadingDialog.getInstance(getApplicationContext()).dismiss();//隐藏
-//                                        showToast(MainActivity.this, "login ok");
-//                                        addlog("login ok");
-//                                    }
-//                                });
-//                            }
-//                        });
-//                    }
-//                }).start();
-//            }
         });
 
 
@@ -643,14 +728,9 @@ public class MainActivity extends Activity {
                 addlog("结束测试");
                 running = false;
                 RTCEngine.setVoiceStat(false);
-                client.stopTranslate(streamId);
+                if (client != null)
+                    client.stopTranslate(streamId);
                 streamId = 0;
-//                try {
-//                    outfile.flush();
-//                    outfile.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
             }
         });
 
@@ -751,7 +831,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        client.closeRTVT();
+        if (client !=null)
+            client.closeRTVT();
         System.exit(0);
     }
 
