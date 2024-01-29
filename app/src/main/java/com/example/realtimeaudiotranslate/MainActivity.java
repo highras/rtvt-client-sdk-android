@@ -63,14 +63,10 @@ import java.util.TimerTask;
 public class MainActivity extends Activity {
     ArrayList<String> realLog =  new ArrayList<>();
 
-//    long pid =0 ;
-//    String endpoint = "";
-//    String key = "";
+    long pid =0 ;
+    String endpoint = "";
+    String key = "";
 
-    long pid = 81700051;
-    String endpoint = "rtvt.ilivedata.com:14001";
-    String key = "MDlmMzBkNDItYThlMS00ZWVjLTgxZDMtOWZhMzg3YWNiNDQz";
-    List<String> beixuan = new ArrayList<String>()
 //    {{
 //        add("en");
 //        add("es");

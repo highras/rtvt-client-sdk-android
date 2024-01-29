@@ -34,7 +34,7 @@
     
     client = RTVTClient.CreateClient(endpoint, pid, new RTVTExampleQuestProcessor(), this.getApplicationContext());
 
-    client.login(String secretKey, IRTVTEmptyCallback  callback)
+    client.login(String token, IRTVTEmptyCallback  callback)
 
     client.startTranslate("zh", "en", null, true, false, true, "123456",new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() 
     
