@@ -62,9 +62,8 @@ import java.util.TimerTask;
 
 public class MainActivity extends Activity {
     ArrayList<String> realLog =  new ArrayList<>();
-
-    long pid =0 ;
-    String endpoint = "";
+    long pid  =0;
+    String endpoint ="";
     String key = "";
 
 //    {{
@@ -152,20 +151,22 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void translatedTempResult(long streamId, long startTs, long endTs, long recTs, String language, String destVoiceText) {
+        public void translatedTempResult(long streamId, long startTs, long endTs, long recTs, String lan, String destVoiceText, long taskId) {
+            if (destVoiceText.isEmpty())
+                return;
             JSONObject tt = new JSONObject();
             try {
                 tt.put("streamId", streamId);
                 tt.put("startTs", startTs);
                 tt.put("endTs", endTs);
                 tt.put("recTs", recTs);
-                tt.put("lan", language);
+                tt.put("lan", lan);
                 tt.put("result", destVoiceText);
+                tt.put("taskId", taskId);
             }
             catch (Exception ex){
 
             }
-
             mylog.log("translatedTempResult:" + tt);
             SpannableString srctext = new SpannableString(destVoiceText);
             srctext.setSpan(new ForegroundColorSpan(Color.BLUE),0, destVoiceText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -186,7 +187,7 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void translatedResult(long streamId, long startTs, long endTs, long recTs, String lan, String destVoiceText) {
+        public void translatedResult(long streamId, long startTs, long endTs, long recTs, String lan, String destVoiceText, long taskId) {
             JSONObject tt = new JSONObject();
             try {
                 tt.put("streamId", streamId);
@@ -195,11 +196,11 @@ public class MainActivity extends Activity {
                 tt.put("recTs", recTs);
                 tt.put("lan", lan);
                 tt.put("result", destVoiceText);
+                tt.put("taskId", taskId);
             }
             catch (Exception ex){
 
             }
-
             mylog.log("translatedResult:" + tt);
             SpannableString realtext = new SpannableString(destVoiceText);
             realtext.setSpan(new ForegroundColorSpan(Color.BLACK),0, destVoiceText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -219,7 +220,7 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void recognizedTempResult(long streamId, long startTs, long endTs, long recTs, String language,String srcVoiceText) {
+        public void recognizedTempResult(long streamId, long startTs, long endTs, long recTs, String language,String srcVoiceText, long taskId) {
             JSONObject tt = new JSONObject();
             try {
                 tt.put("streamId", streamId);
@@ -228,12 +229,11 @@ public class MainActivity extends Activity {
                 tt.put("recTs", recTs);
                 tt.put("lan", language);
                 tt.put("result", srcVoiceText);
+                tt.put("taskId", taskId);
             }
             catch (Exception ex){
 
             }
-//            if (srcVoiceText.isEmpty())
-//                return;
             mylog.log("recognizedTempResult:" + tt);
             SpannableString srctext = new SpannableString(srcVoiceText);
             srctext.setSpan(new ForegroundColorSpan(Color.BLUE),0, srcVoiceText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -255,7 +255,7 @@ public class MainActivity extends Activity {
 
 
         @Override
-        public void recognizedResult(long streamId, long startTs, long endTs, long recTs, String language,String srcVoiceText) {
+        public void recognizedResult(long streamId, long startTs, long endTs, long recTs, String language,String srcVoiceText, long taskId) {
             JSONObject tt = new JSONObject();
             try {
                 tt.put("streamId", streamId);
@@ -264,11 +264,12 @@ public class MainActivity extends Activity {
                 tt.put("recTs", recTs);
                 tt.put("lan", language);
                 tt.put("result", srcVoiceText);
+                tt.put("taskId", taskId);
+
             }
             catch (Exception ex){
 
             }
-
 
             mylog.log("recognizedResult:" + tt);
             SpannableString realtext = new SpannableString(srcVoiceText);
@@ -409,7 +410,6 @@ public class MainActivity extends Activity {
 //            e.printStackTrace();
 //        }
 
-//        mylog.log(" data len " + pcmdata.length);
         client.sendVoice(streamId, ++seq, pcmdata, System.currentTimeMillis(), new RTVTUserInterface.IRTVTEmptyCallback(){
 
             @Override
@@ -454,7 +454,7 @@ public class MainActivity extends Activity {
         String srclang = ((CItem)(srcspinner.getSelectedItem())).getValue();
         String destlang = ((CItem)(destspinner.getSelectedItem())).getValue();
         showToast(MainActivity.this, "开始测试");
-        client.startTranslate(srclang, destlang, beixuan, true, true, true, "123456",new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
+        client.startTranslate(srclang, destlang, null, true, true, true, false,"123456",new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
             @Override
             public void onError(RTVTStruct.RTVTAnswer answer) {
                 String msg = "startTranslate failed " + answer.getErrInfo();

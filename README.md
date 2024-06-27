@@ -8,6 +8,11 @@
 - 最低支持Android版本为5.0(api21)
 
 ### 使用说明
+  dependencies {
+    implementation 'com.github.highras:rtvt-android:2.0.0'
+  }
+
+
 - rtvt实时语音翻译需要的权限
   ~~~
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -36,7 +41,7 @@
 
     client.login(String token, IRTVTEmptyCallback  callback)
 
-    client.startTranslate("zh", "en", null, true, false, true, "123456",new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() 
+    client.startTranslate(srclang, destlang, null, true, true, true, false,"xxxx",new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {})
     
     client.sendVoice(long streamId, long seq, byte[] voicedata, UserInterface.IRTVTEmptyCallback callback) 
     
@@ -65,12 +70,12 @@
      * @param destLanguage 翻译的目标语言 (如果不需要翻译 可空)
      * @param srcAltLanguage 备选语言列表(可空 如果传了备选语言 会有3秒自动语种识别 第一句返回的识别和翻译时长会变大）
      * @param asrResult 是否需要语音识别的结果。如果设置为true 识别结果通过recognizedResult回调
-     * @param tempResult 是否需要临时结果 如果设置为true 临时识别结果通过recognizedTempResult回调(用于长句快速的返回)
+     * @param tempResult 是否需要临时结果 如果设置为true 临时识别结果和翻译结果通过recognizedTempResult和translatedTempResult回调(用于长句快速的返回)
      * @param transResult 是否需要翻译结果 如果设置为true 翻译结果通过translatedResult回调
+     * @param ttsResult 是否需要TTS结果，TTS仅合成最终翻译结果
      * @param userId  后台显示便于查询 （业务端可以和返回的streamid绑定）
      */
-    public void startTranslate(String srcLanguage, String destLanguage, List<String> srcAltLanguage, boolean asrResult, boolean tempResult, boolean transResult,String userId, final RTVTUserInterface.IRTVTCallback<VoiceStream> callback)
-
+ public void startTranslate(String srcLanguage, String destLanguage, List<String> srcAltLanguage, boolean asrResult, boolean tempResult, boolean transResult, boolean ttsResult,String userId, final RTVTUserInterface.IRTVTCallback<VoiceStream> callback)
 
     /**
      * 发送语音片段
@@ -102,14 +107,15 @@
 
 
     /**
-     *开始实时翻译语音流(需要先login成功)
+     *开始实时翻译语音流(多语种翻译)
      * @param srcLanguage 源语言(必传)
      * @param srcAltLanguage 备选语言列表(可空 如果传了备选语言 会有3秒自动语种识别 第一句返回的识别和翻译时长会变大）
      * @param asrResult 是否需要语音识别的结果。如果设置为true 识别结果通过recognizedResult回调
      * @param tempResult 是否需要临时识别结果和临时翻译结果 如果设置为true 临时识别结果通过recognizedTempResult回调 翻译临时结果通过translatedTempResult回调(用于长句快速返回)
+     * @param ttsResult 是否需要TTS结果，TTS仅合成最终翻译结果
      * @param userId  后台显示便于查询 （业务端可以和返回的streamid绑定）
      */
-     public void multi_starTranslate(String srcLanguage, List<String> srcAltLanguage, boolean asrResult,boolean tempResult, String userId, final RTVTUserInterface.IRTVTCallback<VoiceStream> callback)
+    public void multi_startTranslate(String srcLanguage, List<String> srcAltLanguage, boolean asrResult,boolean tempResult, boolean ttsResult, String userId, final RTVTUserInterface.IRTVTCallback<VoiceStream> callback)
      
 
     /** 释放rtvtclient(释放资源,网络广播监听会持有RTVTClient对象 如果不调用RTVTClient对象会一直持有不释放)
@@ -145,8 +151,9 @@
      * @param recTs    识别时间戳，毫秒
      * @param language 识别的语言
      * @param srcVoiceText 识别文本
+     * @param taskId     单句对应的序号
      */
-    public void recognizedResult(long streamId, long startTs, long endTs, long recTs, String language, String srcVoiceText){}
+    public void recognizedResult(long streamId, long startTs, long endTs, long recTs, String language, String srcVoiceText, long taskId){}
 
 
     /**
@@ -157,8 +164,9 @@
      * @param recTs    识别时间戳，毫秒
      * @param language 识别的语言
      * @param srcVoiceText 识别文本
+     * @param taskId     单句对应的序号
      */
-    public void recognizedTempResult(long streamId, long startTs, long endTs, long recTs, String language, String srcVoiceText){}
+    public void recognizedTempResult(long streamId, long startTs, long endTs, long recTs, String language, String srcVoiceText,long taskId){}
 
 
     /**
@@ -169,8 +177,9 @@
      * @param recTs    识别时间戳，毫秒
      * @param language 识别的语言
      * @param destVoiceText 翻译文本
+     * @param taskId     单句对应的序号
      */
-    public void translatedResult(long streamId, long startTs, long endTs, long recTs, String language, String destVoiceText){}
+    public void translatedResult(long streamId, long startTs, long endTs, long recTs, String language, String destVoiceText, long taskId){}
 
     /**
      *临时翻译结果
@@ -180,8 +189,9 @@
      * @param recTs    识别时间戳，毫秒
      * @param language 识别的语言
      * @param destVoiceText 临时翻译文本
+     * @param taskId     单句对应的序号
      */
-    public void translatedTempResult(long streamId, long startTs, long endTs, long recTs, String language, String destVoiceText){}
+    public void translatedTempResult(long streamId, long startTs, long endTs, long recTs, String language, String destVoiceText, long taskId){}
     
 ~~~
 
