@@ -66,6 +66,7 @@ public class MainActivity extends Activity {
     String endpoint ="";
     String key = "";
 
+
 //    {{
 //        add("en");
 //        add("es");
@@ -128,7 +129,8 @@ public class MainActivity extends Activity {
 
     class demoPush extends RTVTPushProcessor {
         @Override
-        public boolean reloginWillStart(int reloginCount) {
+        public boolean reloginWillStart(int reloginCount, RTVTStruct.RTVTAnswer answer) {
+            mylog.log("last answer is :" + answer.getErrInfo());
             return  true;
         }
 
@@ -415,7 +417,6 @@ public class MainActivity extends Activity {
             @Override
             public void onError(RTVTStruct.RTVTAnswer answer) {
                 mylog.log("sendVoice error " + answer.getErrInfo());
-
             }
 
             @Override
@@ -454,7 +455,7 @@ public class MainActivity extends Activity {
         String srclang = ((CItem)(srcspinner.getSelectedItem())).getValue();
         String destlang = ((CItem)(destspinner.getSelectedItem())).getValue();
         showToast(MainActivity.this, "开始测试");
-        client.startTranslate(srclang, destlang, null, true, true, true, false,"123456",new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
+        client.startTranslate(srclang, destlang, null, true, true, true, false,"","123456", RTVTStruct.Codec.PCM,"hello world",new RTVTUserInterface.IRTVTCallback<RTVTStruct.VoiceStream>() {
             @Override
             public void onError(RTVTStruct.RTVTAnswer answer) {
                 String msg = "startTranslate failed " + answer.getErrInfo();
@@ -466,7 +467,7 @@ public class MainActivity extends Activity {
 
             @Override
             public void onSuccess(RTVTStruct.VoiceStream voiceStream) {
-                addlog("startTranslate ok");
+                addlog("startTranslate ok streamId:" + voiceStream.streamId + " srcLang:" + srclang + " dstLang:" + destlang);
                 streamId = voiceStream.streamId;
                 RTCEngine.setVoiceStat(true);
             }
@@ -760,6 +761,17 @@ public class MainActivity extends Activity {
 
 
     private void getLangs(){
+        if (endpoint.isEmpty()){
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setMessage("endpoint 为空").setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            builder.show();
+            return;
+        }
+
         new Thread(new Runnable() {
             @Override
             public void run() {
