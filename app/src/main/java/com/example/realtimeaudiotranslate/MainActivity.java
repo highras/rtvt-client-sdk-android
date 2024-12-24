@@ -66,7 +66,6 @@ public class MainActivity extends Activity {
     String endpoint ="";
     String key = "";
 
-
 //    {{
 //        add("en");
 //        add("es");
